@@ -25,7 +25,9 @@ tests =
                     (\() ->
                         ir__Readme_0
                             |> Expect.equal
-                                (IR.Product [ IR.Int 44, IR.String "Ed" ])
+                                (IR.IR
+                                    (IR.Product [ IR.Int 44, IR.String "Ed" ])
+                                )
                     )
                 , Test.test
                     "1"
@@ -68,12 +70,14 @@ input__Readme_0 =
     { name = "Ed", age = 44 }
 
 
+codec__Readme_0 : IR.Codec User__Readme_0 User__Readme_0
 codec__Readme_0 =
     IR.succeed User__Readme_0
         |> IR.andMap .name IR.string
         |> IR.andMap .age IR.int
 
 
+ir__Readme_0 : IR.IR User__Readme_0
 ir__Readme_0 =
     IR.fromInput codec__Readme_0 input__Readme_0
 
