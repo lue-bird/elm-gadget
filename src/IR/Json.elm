@@ -1,7 +1,5 @@
 module IR.Json exposing (..)
 
--- import Exhaustive
-
 import IR exposing (IR)
 import Json.Decode as JD
 import Json.Encode as JE
