@@ -13,15 +13,29 @@ view codec value =
     htmlAdapter irValue
 
 
-kv k v =
-    H.dl [] [ H.div [] [ H.dt [] [ H.text k ], H.dd [] [ H.text v ] ] ]
+keyValuePair : String -> String -> H.Html msg
+keyValuePair k v =
+    H.dl []
+        [ H.div []
+            [ H.dt [] [ H.text k ]
+            , H.dd [] [ H.text v ]
+            ]
+        ]
+
+
+expandable : String -> List IR.IRValue -> H.Html msg
+expandable label items =
+    H.details []
+        [ H.summary [] [ H.text label ]
+        , H.ol [] (List.map (\item -> H.li [] [ htmlAdapter item ]) items)
+        ]
 
 
 htmlAdapter : IR.IRValue -> H.Html msg
 htmlAdapter irValue =
     case irValue of
         IR.Bool b ->
-            kv "Bool"
+            keyValuePair "Bool"
                 (if b then
                     "True"
 
@@ -30,16 +44,16 @@ htmlAdapter irValue =
                 )
 
         IR.Char c ->
-            kv "Char" (String.fromChar c)
+            keyValuePair "Char" (String.fromChar c)
 
         IR.String s ->
-            kv "String" s
+            keyValuePair "String" s
 
         IR.Int i ->
-            kv "Int" (String.fromInt i)
+            keyValuePair "Int" (String.fromInt i)
 
         IR.Float f ->
-            kv "Float" (String.fromFloat f)
+            keyValuePair "Float" (String.fromFloat f)
 
         IR.Custom selected variant ->
             let
@@ -56,19 +70,16 @@ htmlAdapter irValue =
                             , arg2
                             ]
             in
-            H.details []
-                [ H.summary [] [ H.text ("Custom type, variant " ++ String.fromInt selected ++ " with " ++ String.fromInt (List.length args) ++ " arguments") ]
-                , H.ol [] (List.map (\arg -> H.li [] [ htmlAdapter arg ]) args)
-                ]
+            expandable
+                ("Custom type, variant " ++ String.fromInt selected ++ " with " ++ String.fromInt (List.length args) ++ " arguments")
+                args
 
         IR.Product fields ->
-            H.details []
-                [ H.summary [] [ H.text ("Product type with " ++ String.fromInt (List.length fields) ++ " fields") ]
-                , H.ol [] (List.map (\field -> H.li [] [ htmlAdapter field ]) fields)
-                ]
+            expandable
+                ("Product type with " ++ String.fromInt (List.length fields) ++ " fields")
+                fields
 
         IR.List items ->
-            H.details []
-                [ H.summary [] [ H.text ("List type with " ++ String.fromInt (List.length items) ++ " items") ]
-                , H.ol [] (List.map (\item -> H.li [] [ htmlAdapter item ]) items)
-                ]
+            expandable
+                ("List type with " ++ String.fromInt (List.length items) ++ " items")
+                items
