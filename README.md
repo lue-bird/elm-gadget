@@ -33,6 +33,7 @@ input =
 
 -- Just write an IR.Codec like this:
 
+codec : IR.Codec User User
 codec = 
     IR.succeed User 
         |> IR.andMap .name IR.string 
@@ -40,10 +41,11 @@ codec =
 
 -- Now you can convert to and from IR like this:
 
+ir : IR.IR User
 ir = 
     IR.fromInput codec input
 
-ir --> IR.Product [ IR.Int 44, IR.String "Ed" ] 
+ir --> IR.IR (IR.Product [ IR.Int 44, IR.String "Ed" ])
 
 output = 
     IR.toOutput codec ir
