@@ -132,21 +132,21 @@ type VariantType
 
 {-| TODO
 -}
-fromInput : Codec a a -> a -> IR a
+fromInput : Codec input output -> input -> IR input
 fromInput (Codec c) input =
     c.fromInput input |> IR
 
 
 {-| TODO
 -}
-irType : Codec a a -> IRType
+irType : Codec input output -> IRType
 irType (Codec c) =
     c.irType
 
 
 {-| TODO
 -}
-toOutput : Codec a a -> IR a -> Result Error a
+toOutput : Codec input output -> IR output -> Result Error output
 toOutput (Codec c) (IR irValue) =
     c.toOutput irValue
 

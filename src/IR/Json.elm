@@ -9,8 +9,11 @@ import Json.Encode as JE
 
 encode : IR.Codec input output -> input -> JE.Value
 encode codec value =
-    IR.fromInput codec value
-        |> encodeAdapter
+    let
+        (IR.IR irValue) =
+            IR.fromInput codec value
+    in
+    encodeAdapter irValue
 
 
 decoder : IR.Codec input output -> JD.Decoder output
@@ -18,7 +21,7 @@ decoder codec =
     decodeAdapter
         |> JD.andThen
             (\ir ->
-                case IR.toOutput codec ir of
+                case IR.toOutput codec (IR.IR ir) of
                     Ok s ->
                         JD.succeed s
 
@@ -27,9 +30,9 @@ decoder codec =
             )
 
 
-encodeAdapter : IR -> JE.Value
-encodeAdapter irType =
-    case irType of
+encodeAdapter : IR.IRValue -> JE.Value
+encodeAdapter irValue =
+    case irValue of
         IR.Bool b ->
             JE.object
                 [ ( "bool", JE.bool b ) ]
@@ -89,7 +92,7 @@ encodeAdapter irType =
                 ]
 
 
-decodeAdapter : JD.Decoder IR
+decodeAdapter : JD.Decoder IR.IRValue
 decodeAdapter =
     JD.oneOf
         [ JD.field "bool" JD.bool |> JD.map IR.Bool

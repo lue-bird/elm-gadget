@@ -1,7 +1,7 @@
 module IR.Exhaustive exposing (..)
 
 import Exhaustive
-import IR exposing (IR, IRType)
+import IR exposing (IR, IRType, IRValue)
 
 
 
@@ -15,7 +15,7 @@ exhaustive codec =
         |> exhaustiveAdapter
         |> Exhaustive.andThen
             (\x ->
-                case IR.toOutput codec x of
+                case IR.toOutput codec (IR.IR x) of
                     Ok y ->
                         Exhaustive.constant y
 
@@ -24,7 +24,7 @@ exhaustive codec =
             )
 
 
-exhaustiveAdapter : IRType -> Exhaustive.Generator IR
+exhaustiveAdapter : IRType -> Exhaustive.Generator IRValue
 exhaustiveAdapter irType =
     case irType of
         IR.BoolType ->
