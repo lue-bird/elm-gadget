@@ -12,6 +12,7 @@
         "edkelly303/elm-exhaustive-generators": "1.0.0 <= v < 2.0.0",
         "edkelly303/elm-nested-tuples": "1.0.3 <= v < 2.0.0",
         "elm/core": "1.0.0 <= v < 2.0.0",
+        "elm/html": "1.0.1 <= v < 2.0.0",
         "elm/json": "1.1.4 <= v < 2.0.0",
         "elm/random": "1.0.0 <= v < 2.0.0",
         "elm-community/random-extra": "3.2.0 <= v < 4.0.0",

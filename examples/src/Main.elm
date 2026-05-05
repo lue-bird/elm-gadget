@@ -3,6 +3,7 @@ module Main exposing (..)
 import IR.Diff
 import IR.Fuzz
 import IR.Json
+import IR.Html
 import IR.Random
 import Fuzz
 import Html
@@ -80,14 +81,14 @@ main =
         decoded =
             JD.decodeString (IR.Json.decoder codec) encoded
     in
-    Html.pre []
+    Html.div []
         [ head "Generator ('old' value)"
         , show old
-        , show (IR.fromInput codec old)
+        , IR.Html.view codec old
         , show (IR.irType codec)
         , head "Generator ('new' value)"
         , show new
-        , show (IR.fromInput codec new)
+        , IR.Html.view codec new
         , head "Diff between 'old' & 'new'"
         , show diff
         , head "Patch 'old' with diff"
@@ -95,7 +96,7 @@ main =
         , head "Did patch work?"
         , show (patched == Ok new)
         , head "JSON encoder (old value)"
-        , Html.text encoded
+        , Html.pre [] [Html.text encoded]
         , head "JSON decoder (old value)"
         , show decoded
         , head "Fuzzer"
@@ -110,4 +111,4 @@ head txt =
 
 show : a -> Html.Html msg
 show a =
-    Html.div [] [ Html.text (Debug.toString a) ]
+    Html.pre [] [ Html.text (Debug.toString a) ]
