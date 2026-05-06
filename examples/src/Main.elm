@@ -1,13 +1,13 @@
 module Main exposing (..)
 
-import IR.Diff
-import IR.Fuzz
-import IR.Json
-import IR.Html
-import IR.Random
 import Fuzz
 import Html
 import IR
+import IR.Diff
+import IR.Fuzz
+import IR.Html
+import IR.Json
+import IR.Random
 import Json.Decode as JD
 import Json.Encode as JE
 import Random
@@ -55,10 +55,10 @@ exampleCodec =
 main : Html.Html msg
 main =
     let
-        codec = 
+        codec =
             IR.list exampleCodec
 
-        old = 
+        old =
             Random.step (IR.Random.generator codec) (Random.initialSeed 14)
                 |> Tuple.first
 
@@ -96,7 +96,7 @@ main =
         , head "Did patch work?"
         , show (patched == Ok new)
         , head "JSON encoder (old value)"
-        , Html.pre [] [Html.text encoded]
+        , Html.pre [] [ Html.text encoded ]
         , head "JSON decoder (old value)"
         , show decoded
         , head "Fuzzer"

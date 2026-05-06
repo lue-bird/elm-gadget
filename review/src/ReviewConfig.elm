@@ -32,15 +32,17 @@ config =
         , unused
         , simplify
         , snippets
-        ]        
+        ]
         |> ignoreResearch
 
 
 ignoreDocSnippets =
     List.map (Rule.ignoreErrorsForFiles [ "tests/DocumentationCodeSnippetTest.elm" ])
 
-ignoreResearch = 
-    List.map (Rule.ignoreErrorsForDirectories ["src/Research"])
+
+ignoreResearch =
+    List.map (Rule.ignoreErrorsForDirectories [ "src/Research" ])
+
 
 docs =
     [ Docs.NoMissing.rule
@@ -52,7 +54,6 @@ docs =
     , Docs.UpToDateReadmeLinks.rule
     ]
         |> ignoreDocSnippets
-
 
 
 misc =
