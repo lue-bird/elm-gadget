@@ -10,7 +10,7 @@ fuzzer codec =
         |> fuzzAdapter
         |> Fuzz.andThen
             (\x ->
-                case IR.toOutput codec (IR.IR x) of
+                case IR.toOutput codec x of
                     Ok y ->
                         Fuzz.constant y
 
@@ -19,7 +19,7 @@ fuzzer codec =
             )
 
 
-fuzzAdapter : IR.IRType -> Fuzz.Fuzzer IR.IRValue
+fuzzAdapter : IR.IRType -> Fuzz.Fuzzer IR.IR
 fuzzAdapter irType =
     case irType of
         IR.BoolType ->

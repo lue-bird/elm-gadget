@@ -43,10 +43,10 @@ diff codec old new =
         irType =
             IR.irType codec
     in
-    IR.run2 (diffHelp irType) oldIR newIR
+    diffHelp irType oldIR newIR
 
 
-diffHelp : IR.IRType -> IR.IRValue -> IR.IRValue -> Diff
+diffHelp : IR.IRType -> IR.IR -> IR.IR -> Diff
 diffHelp irType_ oldIR_ newIR_ =
     if oldIR_ == newIR_ then
         Identical
@@ -267,7 +267,7 @@ doRunLengthEncoding list =
         list
 
 
-areSimilar : IR.IRType -> IR.IRValue -> IR.IRValue -> Maybe Diff
+areSimilar : IR.IRType -> IR.IR -> IR.IR -> Maybe Diff
 areSimilar irType old new =
     let
         oldNewDiff =
@@ -349,7 +349,7 @@ size changes =
             1
 
 
-default : IR.IRType -> IR.IRValue
+default : IR.IRType -> IR.IR
 default irType =
     case irType of
         IR.BoolType ->
@@ -390,7 +390,7 @@ default irType =
 patch : IR.Codec a a -> Diff -> a -> Result String a
 patch codec delta old =
     let
-        (IR.IR oldIR) =
+        oldIR =
             IR.fromInput codec old
 
         irType =
@@ -398,14 +398,14 @@ patch codec delta old =
     in
     case patchHelp delta oldIR irType of
         Ok ir ->
-            IR.toOutput codec (IR.IR ir)
+            IR.toOutput codec ir
                 |> Result.mapError (\_ -> "IR.toOutput failed")
 
         Err e ->
             Err e
 
 
-patchHelp : Diff -> IR.IRValue -> IR.IRType -> Result String IR.IRValue
+patchHelp : Diff -> IR.IR -> IR.IRType -> Result String IR.IR
 patchHelp changes_ old_ irType_ =
     case ( changes_, old_, irType_ ) of
         ( Identical, any, _ ) ->
@@ -544,7 +544,7 @@ patchHelp changes_ old_ irType_ =
             Err ("mismatch between \n" ++ Debug.toString diff_ ++ "\n" ++ Debug.toString old__ ++ "\n" ++ Debug.toString type_)
 
 
-listPatchHelp : ListChange -> List IR.IRValue -> IR.IRType -> Maybe (List IR.IRValue)
+listPatchHelp : ListChange -> List IR.IR -> IR.IRType -> Maybe (List IR.IR)
 listPatchHelp change oldList itemType =
     case change of
         Added itemDiff ->

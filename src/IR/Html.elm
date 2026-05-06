@@ -7,7 +7,7 @@ import IR
 view : IR.Codec input output -> input -> H.Html msg
 view codec value =
     IR.fromInput codec value
-        |> IR.run htmlAdapter
+        |> htmlAdapter
 
 
 keyValuePair : String -> String -> H.Html msg
@@ -20,7 +20,7 @@ keyValuePair k v =
         ]
 
 
-expandable : String -> List IR.IRValue -> H.Html msg
+expandable : String -> List IR.IR -> H.Html msg
 expandable label items =
     H.details []
         [ H.summary [] [ H.text label ]
@@ -28,7 +28,7 @@ expandable label items =
         ]
 
 
-htmlAdapter : IR.IRValue -> H.Html msg
+htmlAdapter : IR.IR -> H.Html msg
 htmlAdapter irValue =
     case irValue of
         IR.Bool b ->

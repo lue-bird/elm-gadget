@@ -15,7 +15,7 @@ generator codec =
         |> randomAdapter
         |> Random.andThen
             (\irValue ->
-                case IR.toOutput codec (IR.IR irValue) of
+                case IR.toOutput codec irValue of
                     Ok b ->
                         Random.constant b
 
@@ -25,7 +25,7 @@ generator codec =
             )
 
 
-randomAdapter : IR.IRType -> Random.Generator IR.IRValue
+randomAdapter : IR.IRType -> Random.Generator IR.IR
 randomAdapter irType =
     case irType of
         IR.BoolType ->

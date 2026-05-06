@@ -9,7 +9,7 @@ encode : IR.Codec input output -> input -> JE.Value
 encode codec value =
     value
         |> IR.fromInput codec
-        |> IR.run encodeAdapter
+        |> encodeAdapter
 
 
 decoder : IR.Codec input output -> JD.Decoder output
@@ -17,7 +17,7 @@ decoder codec =
     decodeAdapter
         |> JD.andThen
             (\irValue ->
-                case IR.toOutput codec (IR.IR irValue) of
+                case IR.toOutput codec irValue of
                     Ok s ->
                         JD.succeed s
 
@@ -26,7 +26,7 @@ decoder codec =
             )
 
 
-encodeAdapter : IR.IRValue -> JE.Value
+encodeAdapter : IR.IR -> JE.Value
 encodeAdapter irValue =
     case irValue of
         IR.Bool b ->
@@ -88,7 +88,7 @@ encodeAdapter irValue =
                 ]
 
 
-decodeAdapter : JD.Decoder IR.IRValue
+decodeAdapter : JD.Decoder IR.IR
 decodeAdapter =
     JD.oneOf
         [ JD.field "bool" JD.bool |> JD.map IR.Bool

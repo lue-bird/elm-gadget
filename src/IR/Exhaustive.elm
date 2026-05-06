@@ -15,7 +15,7 @@ exhaustive codec =
         |> exhaustiveAdapter
         |> Exhaustive.andThen
             (\x ->
-                case IR.toOutput codec (IR.IR x) of
+                case IR.toOutput codec x of
                     Ok y ->
                         Exhaustive.constant y
 
@@ -24,7 +24,7 @@ exhaustive codec =
             )
 
 
-exhaustiveAdapter : IR.IRType -> Exhaustive.Generator IR.IRValue
+exhaustiveAdapter : IR.IRType -> Exhaustive.Generator IR.IR
 exhaustiveAdapter irType =
     case irType of
         IR.BoolType ->

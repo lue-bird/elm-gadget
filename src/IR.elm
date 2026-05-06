@@ -1,6 +1,6 @@
 module IR exposing
     ( Codec
-    , IR(..), IRValue(..), Variant(..), fromInput, toOutput, run, run2, Error(..)
+    , IR(..), Variant(..), fromInput, toOutput, Error(..)
     , IRType(..), VariantType(..), irType
     , bool, char, string, int, float
     , list, array, dict, maybe, result, tuple, triple
@@ -24,7 +24,7 @@ Convert between Elm data types and an intermediate representation (IR)
 
 ## IR values
 
-@docs IR, IRValue, Variant, fromInput, toOutput, run, run2, Error
+@docs IR, (IR a), Variant, fromInput, toOutput, Error
 
 
 ## IR types
@@ -76,37 +76,31 @@ type Error
 -}
 type Codec input output
     = Codec
-        { fromInput : input -> IRValue
-        , toOutput : IRValue -> Result Error output
+        { fromInput : input -> IR
+        , toOutput : IR -> Result Error output
         , irType : IRType
         }
 
 
 {-| TODO
 -}
-type IR a
-    = IR IRValue
-
-
-{-| TODO
--}
-type IRValue
+type IR
     = Bool Bool
     | Char Char
     | String String
     | Int Int
     | Float Float
     | Custom Int Variant
-    | Product (List IRValue)
-    | List (List IRValue)
+    | Product (List IR)
+    | List (List IR)
 
 
 {-| TODO
 -}
 type Variant
     = Variant0
-    | Variant1 IRValue
-    | Variant2 IRValue IRValue
+    | Variant1 IR
+    | Variant2 IR IR
 
 
 {-| TODO
@@ -132,9 +126,9 @@ type VariantType
 
 {-| TODO
 -}
-fromInput : Codec input output -> input -> IR input
+fromInput : Codec input output -> input -> IR
 fromInput (Codec c) input =
-    c.fromInput input |> IR
+    c.fromInput input
 
 
 {-| TODO
@@ -146,23 +140,9 @@ irType (Codec c) =
 
 {-| TODO
 -}
-toOutput : Codec input output -> IR output -> Result Error output
-toOutput (Codec c) (IR irValue) =
-    c.toOutput irValue
-
-
-{-| TODO
--}
-run : (IRValue -> b) -> IR a -> b
-run f (IR irValue) =
-    f irValue
-
-
-{-| TODO
--}
-run2 : (IRValue -> IRValue -> c) -> IR a -> IR b -> c
-run2 f (IR irValue1) (IR irValue2) =
-    f irValue1 irValue2
+toOutput : Codec input output -> IR -> Result Error output
+toOutput (Codec c) a =
+    c.toOutput a
 
 
 {-| TODO
@@ -257,7 +237,7 @@ float =
 
 {-| TODO
 -}
-list : Codec a a -> Codec (List a) (List a)
+list : Codec input output -> Codec (List input) (List output)
 list (Codec item) =
     Codec
         { fromInput = \items -> List (List.map item.fromInput items)
@@ -355,7 +335,7 @@ triple a b c =
 type CustomCodec input hasAtLeastOneVariant output
     = CustomCodec
         { match : input
-        , fromIR : IRValue -> Result Error output
+        , fromIR : IR -> Result Error output
         , variantTypes : List VariantType
         , index : Int
         }
@@ -377,7 +357,7 @@ custom match =
 -}
 variant0 :
     output
-    -> CustomCodec (IRValue -> input) variantType output
+    -> CustomCodec (IR -> input) variantType output
     -> CustomCodec input () output
 variant0 ctor (CustomCodec prev) =
     CustomCodec
@@ -404,7 +384,7 @@ variant0 ctor (CustomCodec prev) =
 variant1 :
     (arg1 -> output)
     -> Codec arg1 arg1
-    -> CustomCodec ((arg1 -> IRValue) -> input) variantType output
+    -> CustomCodec ((arg1 -> IR) -> input) variantType output
     -> CustomCodec input () output
 variant1 ctor (Codec argfns) (CustomCodec prev) =
     let
@@ -436,7 +416,7 @@ variant2 :
     (arg1 -> arg2 -> output)
     -> Codec arg1 arg1
     -> Codec arg2 arg2
-    -> CustomCodec ((arg1 -> arg2 -> IRValue) -> input) variantType output
+    -> CustomCodec ((arg1 -> arg2 -> IR) -> input) variantType output
     -> CustomCodec input () output
 variant2 ctor (Codec arg1fns) (Codec arg2fns) (CustomCodec prev) =
     let
@@ -464,7 +444,7 @@ variant2 ctor (Codec arg1fns) (Codec arg2fns) (CustomCodec prev) =
 
 {-| TODO
 -}
-endCustom : CustomCodec (a -> IRValue) () a -> Codec a a
+endCustom : CustomCodec (a -> IR) () a -> Codec a a
 endCustom (CustomCodec prev) =
     Codec
         { fromInput = prev.match
