@@ -1,0 +1,94 @@
+.elm-ir {
+    --primitive-bg: hsl(0 100 95);
+    --combinator-bg: hsl(0 100 99);
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+
+    & ol {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        padding-left: 20px;
+
+        list-style: none;
+        counter-reset: items;
+
+        & li {
+            display: flex;
+            flex-direction: row;
+            counter-increment: items;
+            gap: 5px;
+            align-items: center;
+        }
+
+        & li:first-child {
+            counter-set: items 0;
+        }
+
+        & li:before {
+            content: counter(items);
+            font-size: 8pt;
+        }
+    }
+
+
+
+    & .primitive {
+        border: solid black 1px;
+        border-radius: 5px;
+        padding: 5px;
+
+        & dt {
+            font-size: 8pt;
+        }
+
+        & dd {
+            margin-left: 0px;
+        }
+    }
+
+    & .combinator {
+        border: solid black 1px;
+        border-radius: 5px;
+        padding: 10px;
+
+        & summary {
+            font-size: 8pt;
+        }
+
+        &>:nth-child(2) {
+            margin-top: 10px;
+        }
+    }
+
+    & .Custom {
+        background-color: var(--combinator-bg);
+    }
+
+    & .List {
+        background-color: hsl(from var(--combinator-bg) 135deg s l);
+    }
+
+    & .Product {
+        background-color: hsl(from var(--combinator-bg) 225deg s l);
+    }
+
+    & .Bool {
+        background-color: var(--primitive-bg);
+    }
+
+    & .Char {
+        background-color: hsl(from var(--primitive-bg) 60deg s l);
+    }
+
+    & .String {
+        background-color: hsl(from var(--primitive-bg) 120deg s l);
+    }
+
+    & .Int {
+        background-color: hsl(from var(--primitive-bg) 180deg s l);
+    }
+
+    & .Float {
+        background-color: hsl(from var(--primitive-bg) 240deg s l);
+    }
+}

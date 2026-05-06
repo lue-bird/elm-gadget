@@ -41,11 +41,11 @@ codec =
 
 -- Now you can convert to and from IR like this:
 
-ir : IR.IR User
+ir : IR.IR
 ir = 
     IR.fromInput codec input
 
-ir --> IR.IR (IR.Product [ IR.Int 44, IR.String "Ed" ])
+ir --> IR.Product [ IR.Int 44, IR.String "Ed" ]
 
 output = 
     IR.toOutput codec ir

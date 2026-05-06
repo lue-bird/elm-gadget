@@ -1,6 +1,7 @@
 module IR.Html exposing (..)
 
 import Html as H
+import Html.Attributes as HA
 import IR
 
 
@@ -8,31 +9,47 @@ view : IR.Codec input output -> input -> H.Html msg
 view codec value =
     IR.fromInput codec value
         |> htmlAdapter
+        |> List.singleton
+        |> H.article [ HA.class "elm-ir" ]
 
 
-keyValuePair : String -> String -> H.Html msg
-keyValuePair k v =
+primitive : String -> String -> H.Html msg
+primitive label value =
     H.dl []
-        [ H.div []
-            [ H.dt [] [ H.text k ]
-            , H.dd [] [ H.text v ]
+        [ H.div [ HA.class "primitive", HA.class label ]
+            [ H.dt [] [ H.text label ]
+            , H.dd [] [ H.code [] [ H.text value ] ]
             ]
         ]
 
 
-expandable : String -> List IR.IR -> H.Html msg
-expandable label items =
-    H.details []
-        [ H.summary [] [ H.text label ]
-        , H.ol [] (List.map (\item -> H.li [] [ htmlAdapter item ]) items)
-        ]
+combinator : String -> String -> List IR.IR -> H.Html msg
+combinator label meta items =
+    if List.isEmpty items then
+        H.div [ HA.class "combinator", HA.class label ]
+            [ H.summary []
+                [ H.strong [] [ H.text label ]
+                , H.text (" " ++ meta)
+                ]
+            ]
+
+    else
+        H.details [ HA.class "combinator", HA.class label ]
+            [ H.summary []
+                [ H.strong [] [ H.text label ]
+                , H.text (" " ++ meta)
+                ]
+            , H.ol
+                []
+                (List.map (\item -> H.li [] [ htmlAdapter item ]) items)
+            ]
 
 
 htmlAdapter : IR.IR -> H.Html msg
 htmlAdapter irValue =
     case irValue of
         IR.Bool b ->
-            keyValuePair "Bool"
+            primitive "Bool"
                 (if b then
                     "True"
 
@@ -41,16 +58,16 @@ htmlAdapter irValue =
                 )
 
         IR.Char c ->
-            keyValuePair "Char" (String.fromChar c)
+            primitive "Char" ("'" ++ String.fromChar c ++ "'")
 
         IR.String s ->
-            keyValuePair "String" s
+            primitive "String" ("\"" ++ s ++ "\"")
 
         IR.Int i ->
-            keyValuePair "Int" (String.fromInt i)
+            primitive "Int" (String.fromInt i)
 
         IR.Float f ->
-            keyValuePair "Float" (String.fromFloat f)
+            primitive "Float" (String.fromFloat f)
 
         IR.Custom selected variant ->
             let
@@ -67,16 +84,24 @@ htmlAdapter irValue =
                             , arg2
                             ]
             in
-            expandable
-                ("Custom type, variant " ++ String.fromInt selected ++ " with " ++ String.fromInt (List.length args) ++ " arguments")
+            combinator
+                "Custom"
+                ("variant #"
+                    ++ String.fromInt selected
+                    ++ " with "
+                    ++ String.fromInt (List.length args)
+                    ++ " arguments"
+                )
                 args
 
         IR.Product fields ->
-            expandable
-                ("Product type with " ++ String.fromInt (List.length fields) ++ " fields")
+            combinator
+                "Product"
+                ("with " ++ String.fromInt (List.length fields) ++ " fields")
                 fields
 
         IR.List items ->
-            expandable
-                ("List type with " ++ String.fromInt (List.length items) ++ " items")
+            combinator
+                "List"
+                ("with " ++ String.fromInt (List.length items) ++ " items")
                 items

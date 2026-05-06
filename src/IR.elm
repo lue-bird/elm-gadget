@@ -24,7 +24,7 @@ Convert between Elm data types and an intermediate representation (IR)
 
 ## IR values
 
-@docs IR, (IR a), Variant, fromInput, toOutput, Error
+@docs IR, Variant, fromInput, toOutput, Error
 
 
 ## IR types
