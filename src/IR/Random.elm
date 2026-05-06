@@ -1,6 +1,6 @@
 module IR.Random exposing (..)
 
-import IR exposing (IR, IRType)
+import IR
 import Random
 import Random.Char
 import Random.Extra
@@ -25,7 +25,7 @@ generator codec =
             )
 
 
-randomAdapter : IRType -> Random.Generator IR.IRValue
+randomAdapter : IR.IRType -> Random.Generator IR.IRValue
 randomAdapter irType =
     case irType of
         IR.BoolType ->

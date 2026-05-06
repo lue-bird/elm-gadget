@@ -1,25 +1,23 @@
 module IR.Json exposing (..)
 
-import IR exposing (IR)
+import IR
 import Json.Decode as JD
 import Json.Encode as JE
 
 
 encode : IR.Codec input output -> input -> JE.Value
 encode codec value =
-    let
-        (IR.IR irValue) =
-            IR.fromInput codec value
-    in
-    encodeAdapter irValue
+    value
+        |> IR.fromInput codec
+        |> IR.run encodeAdapter
 
 
 decoder : IR.Codec input output -> JD.Decoder output
 decoder codec =
     decodeAdapter
         |> JD.andThen
-            (\ir ->
-                case IR.toOutput codec (IR.IR ir) of
+            (\irValue ->
+                case IR.toOutput codec (IR.IR irValue) of
                     Ok s ->
                         JD.succeed s
 

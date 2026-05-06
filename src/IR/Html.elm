@@ -6,11 +6,8 @@ import IR
 
 view : IR.Codec input output -> input -> H.Html msg
 view codec value =
-    let
-        (IR.IR irValue) =
-            IR.fromInput codec value
-    in
-    htmlAdapter irValue
+    IR.fromInput codec value
+        |> IR.run htmlAdapter
 
 
 keyValuePair : String -> String -> H.Html msg

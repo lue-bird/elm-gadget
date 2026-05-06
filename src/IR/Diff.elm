@@ -34,20 +34,20 @@ type ListChange
 diff : IR.Codec output output -> output -> output -> Diff
 diff codec old new =
     let
-        (IR.IR oldIR) =
+        oldIR =
             IR.fromInput codec old
 
-        (IR.IR newIR) =
+        newIR =
             IR.fromInput codec new
 
         irType =
             IR.irType codec
     in
-    diffHelp oldIR newIR irType
+    IR.run2 (diffHelp irType) oldIR newIR
 
 
-diffHelp : IR.IRValue -> IR.IRValue -> IR.IRType -> Diff
-diffHelp oldIR_ newIR_ irType_ =
+diffHelp : IR.IRType -> IR.IRValue -> IR.IRValue -> Diff
+diffHelp irType_ oldIR_ newIR_ =
     if oldIR_ == newIR_ then
         Identical
 
@@ -81,7 +81,7 @@ diffHelp oldIR_ newIR_ irType_ =
                                                 Just (Moved oldIdx) :: out
 
                                             Nothing ->
-                                                Just (Added (diffHelp (default itemType) newItem itemType)) :: out
+                                                Just (Added (diffHelp itemType (default itemType) newItem)) :: out
                                     }
 
                                 ListDiffer.Removed _ ->
@@ -110,7 +110,7 @@ diffHelp oldIR_ newIR_ irType_ =
             ( IR.Product fields1, IR.Product fields2, IR.ProductType fieldTypes ) ->
                 let
                     changes =
-                        List.map3 diffHelp fields1 fields2 fieldTypes
+                        List.map3 diffHelp fieldTypes fields1 fields2
                             |> List.indexedMap Tuple.pair
                             |> List.filter (\( _, arg ) -> arg /= Identical)
                 in
@@ -162,14 +162,14 @@ diffHelp oldIR_ newIR_ irType_ =
                             List.Extra.zip3 oldArgs newArgs newArgTypes
                                 |> List.indexedMap
                                     (\idx ( oldArg, newArg, argType ) ->
-                                        ( idx, diffHelp oldArg newArg argType )
+                                        ( idx, diffHelp argType oldArg newArg )
                                     )
 
                         else
                             List.Extra.zip newArgs newArgTypes
                                 |> List.indexedMap
                                     (\idx ( newArg, argType ) ->
-                                        ( idx, diffHelp (default argType) newArg argType )
+                                        ( idx, diffHelp argType (default argType) newArg )
                                     )
                 in
                 diffedArgs
@@ -271,10 +271,10 @@ areSimilar : IR.IRType -> IR.IRValue -> IR.IRValue -> Maybe Diff
 areSimilar irType old new =
     let
         oldNewDiff =
-            diffHelp old new irType
+            diffHelp irType old new
 
         defaultNewDiff =
-            diffHelp (default irType) new irType
+            diffHelp irType (default irType) new
     in
     if size oldNewDiff < size defaultNewDiff then
         Just oldNewDiff

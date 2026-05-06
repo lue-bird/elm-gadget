@@ -1,7 +1,7 @@
 module IR.Fuzz exposing (..)
 
 import Fuzz
-import IR exposing (IR, IRType)
+import IR
 
 
 fuzzer : IR.Codec input output -> Fuzz.Fuzzer output
@@ -19,7 +19,7 @@ fuzzer codec =
             )
 
 
-fuzzAdapter : IRType -> Fuzz.Fuzzer IR.IRValue
+fuzzAdapter : IR.IRType -> Fuzz.Fuzzer IR.IRValue
 fuzzAdapter irType =
     case irType of
         IR.BoolType ->
