@@ -1,7 +1,7 @@
 module IR.String exposing (parser, print)
 
 import IR
-import Parser as P exposing (..)
+import Parser as P exposing ((|.), (|=), Parser)
 
 
 print : IR.Codec input output -> input -> String
@@ -193,9 +193,9 @@ boolParser =
 
 charParser : Parser IR.IR
 charParser =
-    (succeed identity
+    (P.succeed identity
         |. P.token "c("
-        |= loop "" stringParserHelp
+        |= P.loop "" stringParserHelp
     )
         |> P.andThen
             (\str ->
@@ -313,27 +313,27 @@ looping. Fixed version is here.
 -}
 stringParser : Parser IR.IR
 stringParser =
-    succeed IR.String
+    P.succeed IR.String
         |. P.token "s("
-        |= loop "" stringParserHelp
+        |= P.loop "" stringParserHelp
 
 
-stringParserHelp : String -> Parser (Step String String)
+stringParserHelp : String -> Parser (P.Step String String)
 stringParserHelp string =
-    oneOf
-        [ token (String.fromList [ '/', ')' ])
-            |> map (\_ -> string ++ String.fromChar ')' |> Loop)
-        , token (String.fromList [ '/', '/' ])
-            |> map (\_ -> string ++ String.fromChar '/' |> Loop)
-        , chompIf ((==) ')')
-            |> map (\_ -> Done string)
-        , chompIf ((==) '/')
-            |> map (\_ -> string ++ String.fromChar '/' |> Loop)
-        , succeed ()
-            |. chompIf (\c -> c /= ')' && c /= '/')
-            |. chompWhile (\c -> c /= ')' && c /= '/')
-            |> getChompedString
-            |> map (\s -> string ++ s |> Loop)
+    P.oneOf
+        [ P.token (String.fromList [ '/', ')' ])
+            |> P.map (\_ -> string ++ String.fromChar ')' |> P.Loop)
+        , P.token (String.fromList [ '/', '/' ])
+            |> P.map (\_ -> string ++ String.fromChar '/' |> P.Loop)
+        , P.chompIf ((==) ')')
+            |> P.map (\_ -> P.Done string)
+        , P.chompIf ((==) '/')
+            |> P.map (\_ -> string ++ String.fromChar '/' |> P.Loop)
+        , P.succeed ()
+            |. P.chompIf (\c -> c /= ')' && c /= '/')
+            |. P.chompWhile (\c -> c /= ')' && c /= '/')
+            |> P.getChompedString
+            |> P.map (\s -> string ++ s |> P.Loop)
         ]
 
 
