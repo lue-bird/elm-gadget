@@ -23,18 +23,13 @@ primitive quote label value =
         ]
 
 
-quotedString : String -> String -> H.Html msg
-quotedString =
-    primitive (H.span [ HA.class "quote" ] [ H.text "\"" ])
+quotedPrimitive : String -> String -> String -> H.Html msg
+quotedPrimitive quote =
+    primitive (H.span [ HA.class "quote" ] [ H.text quote ])
 
 
-quotedChar : String -> String -> H.Html msg
-quotedChar =
-    primitive (H.span [ HA.class "quote" ] [ H.text "'" ])
-
-
-nonQuotedPrimitive : String -> String -> H.Html msg
-nonQuotedPrimitive =
+unquotedPrimitive : String -> String -> H.Html msg
+unquotedPrimitive =
     primitive (H.text "")
 
 
@@ -64,7 +59,7 @@ htmlAdapter : IR.IR -> H.Html msg
 htmlAdapter irValue =
     case irValue of
         IR.Bool b ->
-            nonQuotedPrimitive "Bool"
+            unquotedPrimitive "Bool"
                 (if b then
                     "True"
 
@@ -73,16 +68,16 @@ htmlAdapter irValue =
                 )
 
         IR.Char c ->
-            quotedChar "Char" (String.fromChar c)
+            quotedPrimitive "'" "Char" (String.fromChar c)
 
         IR.String s ->
-            quotedString "String" s
+            quotedPrimitive "\"" "String" s
 
         IR.Int i ->
-            nonQuotedPrimitive "Int" (String.fromInt i)
+            unquotedPrimitive "Int" (String.fromInt i)
 
         IR.Float f ->
-            nonQuotedPrimitive "Float" (String.fromFloat f)
+            unquotedPrimitive "Float" (String.fromFloat f)
 
         IR.Custom selected variant ->
             let
