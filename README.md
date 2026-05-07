@@ -10,6 +10,10 @@ Because it makes it relatively easy to build cool tools (JSON encoders/decoders,
 fuzzers, random generators, diff/patchers, parser/printers, and any other
 bidirectional converters) for any Elm data type, with minimal boilerplate.
 
+## Show me!
+
+Do `npx run-pty run-pty.json` in the project root folder.
+
 ## How?
 
 ```elm
