@@ -99,7 +99,7 @@ htmlAdapter irValue =
                 ("variant #"
                     ++ String.fromInt selected
                     ++ " with "
-                    ++ String.fromInt (List.length args)
+                    ++ count args
                     ++ " arguments"
                 )
                 args
@@ -107,11 +107,16 @@ htmlAdapter irValue =
         IR.Product fields ->
             combinator
                 "Product"
-                ("with " ++ String.fromInt (List.length fields) ++ " fields")
+                ("with " ++ count fields ++ " fields")
                 fields
 
         IR.List items ->
             combinator
                 "List"
-                ("with " ++ String.fromInt (List.length items) ++ " items")
+                ("with " ++ count items ++ " items")
                 items
+
+
+count : List a -> String
+count =
+    String.fromInt << List.length
