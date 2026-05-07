@@ -60,31 +60,31 @@ main =
         codec =
             IR.list exampleCodec
 
-        old =
+        firstValue =
             Random.step (IR.Random.generator codec) (Random.initialSeed 14)
                 |> Tuple.first
 
-        new =
+        secondValue =
             Random.step (IR.Random.generator codec) (Random.initialSeed 16)
                 |> Tuple.first
 
         diff =
-            IR.Diff.diff codec old new
+            IR.Diff.diff codec firstValue secondValue
 
         patched =
-            IR.Diff.patch codec diff old
+            IR.Diff.patch codec diff firstValue
 
         fuzzed =
             Fuzz.examples 1 (IR.Fuzz.fuzzer codec)
 
         encoded =
-            JE.encode 2 (IR.Json.encode codec old)
+            JE.encode 2 (IR.Json.encode codec firstValue)
 
         decoded =
             JD.decodeString (IR.Json.decoder codec) encoded
 
         printed =
-            IR.String.print codec old
+            IR.String.print codec firstValue
 
         parsed = 
             Parser.run (IR.String.parser codec) printed
@@ -92,25 +92,25 @@ main =
     Html.div []
         [ head "IR type"
         , show (IR.irType codec)
-        , head "Random generator ('old' value)"
-        , show old
-        , head "Random generator ('new' value)"
-        , show new
-        , head "Diff between 'old' & 'new'"
+        , head "Random generator (first value)"
+        , show firstValue
+        , head "Random generator (second value)"
+        , show secondValue
+        , head "Diff between first & second values"
         , show diff
-        , head "Patch 'old' with diff"
+        , head "Patch first value with diff"
         , show patched
-        , head "Did patch work?"
-        , show (patched == Ok new)
-        , head "Html viewer (old value)"
-        , IR.Html.view codec old
-        , head "Printer (old value)"
+        , head "Patched value equals second value?"
+        , show (patched == Ok secondValue)
+        , head "Html viewer (first value)"
+        , IR.Html.view codec firstValue
+        , head "Printer (first value)"
         , Html.pre [] [ Html.text printed ]
-        , head "Parser (old value)"
+        , head "Parser (first value)"
         , show parsed
-        , head "JSON encoder (old value)"
+        , head "JSON encoder (first value)"
         , Html.pre [] [ Html.text encoded ]
-        , head "JSON decoder (old value)"
+        , head "JSON decoder (first value)"
         , show decoded
         , head "Fuzzer"
         , show fuzzed
