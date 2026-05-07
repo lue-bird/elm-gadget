@@ -8,8 +8,10 @@ import IR.Fuzz
 import IR.Html
 import IR.Json
 import IR.Random
+import IR.String
 import Json.Decode as JD
 import Json.Encode as JE
+import Parser
 import Random
 
 
@@ -80,21 +82,32 @@ main =
 
         decoded =
             JD.decodeString (IR.Json.decoder codec) encoded
+
+        printed =
+            IR.String.print codec old
+
+        parsed = 
+            Parser.run (IR.String.parser codec) printed
     in
     Html.div []
-        [ head "Generator ('old' value)"
-        , show old
-        , IR.Html.view codec old
+        [ head "IR type"
         , show (IR.irType codec)
-        , head "Generator ('new' value)"
+        , head "Random generator ('old' value)"
+        , show old
+        , head "Random generator ('new' value)"
         , show new
-        , IR.Html.view codec new
         , head "Diff between 'old' & 'new'"
         , show diff
         , head "Patch 'old' with diff"
         , show patched
         , head "Did patch work?"
         , show (patched == Ok new)
+        , head "Html viewer (old value)"
+        , IR.Html.view codec old
+        , head "Printer (old value)"
+        , Html.pre [] [ Html.text printed ]
+        , head "Parser (old value)"
+        , show parsed
         , head "JSON encoder (old value)"
         , Html.pre [] [ Html.text encoded ]
         , head "JSON decoder (old value)"
