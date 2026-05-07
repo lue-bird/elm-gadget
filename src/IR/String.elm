@@ -99,9 +99,9 @@ irParser : Parser IR.IR
 irParser =
     P.oneOf
         [ primitiveParser "b" IR.Bool boolParser
-        , primitiveParser "c" IR.Char charParser
         , primitiveParser "i" IR.Int intParser
         , primitiveParser "f" IR.Float floatParser
+        , charParser
         , stringParser
         , listParser
         , productParser
@@ -191,10 +191,12 @@ boolParser =
             )
 
 
-charParser : Parser Char
+charParser : Parser IR.IR
 charParser =
-    P.chompIf (always True)
-        |> P.getChompedString
+    (succeed identity
+        |. P.token "c("
+        |= loop "" stringParserHelp
+    )
         |> P.andThen
             (\str ->
                 case String.uncons str of
@@ -202,7 +204,7 @@ charParser =
                         P.problem "Not a char"
 
                     Just ( c, _ ) ->
-                        P.succeed c
+                        P.succeed (IR.Char c)
             )
 
 
