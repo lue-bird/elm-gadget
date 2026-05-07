@@ -13,14 +13,29 @@ view codec value =
         |> H.article [ HA.class "elm-ir" ]
 
 
-primitive : String -> String -> H.Html msg
-primitive label value =
+primitive : H.Html msg -> String -> String -> H.Html msg
+primitive quote label value =
     H.dl []
         [ H.div [ HA.class "primitive", HA.class label ]
-            [ H.dt [] [ H.text label ]
-            , H.dd [] [ H.code [] [ H.text value ] ]
+            [ H.dt [] [ H.strong [] [ H.text label ] ]
+            , H.dd [] [ H.span [] [ quote, H.code [] [ H.text value ], quote ] ]
             ]
         ]
+
+
+quotedString : String -> String -> H.Html msg
+quotedString =
+    primitive (H.span [ HA.class "quote" ] [ H.text "\"" ])
+
+
+quotedChar : String -> String -> H.Html msg
+quotedChar =
+    primitive (H.span [ HA.class "quote" ] [ H.text "'" ])
+
+
+nonQuotedPrimitive : String -> String -> H.Html msg
+nonQuotedPrimitive =
+    primitive (H.text "")
 
 
 combinator : String -> String -> List IR.IR -> H.Html msg
@@ -49,7 +64,7 @@ htmlAdapter : IR.IR -> H.Html msg
 htmlAdapter irValue =
     case irValue of
         IR.Bool b ->
-            primitive "Bool"
+            nonQuotedPrimitive "Bool"
                 (if b then
                     "True"
 
@@ -58,16 +73,16 @@ htmlAdapter irValue =
                 )
 
         IR.Char c ->
-            primitive "Char" ("'" ++ String.fromChar c ++ "'")
+            quotedChar "Char" (String.fromChar c)
 
         IR.String s ->
-            primitive "String" ("\"" ++ s ++ "\"")
+            quotedString "String" s
 
         IR.Int i ->
-            primitive "Int" (String.fromInt i)
+            nonQuotedPrimitive "Int" (String.fromInt i)
 
         IR.Float f ->
-            primitive "Float" (String.fromFloat f)
+            nonQuotedPrimitive "Float" (String.fromFloat f)
 
         IR.Custom selected variant ->
             let

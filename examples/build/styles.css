@@ -42,7 +42,12 @@
         }
 
         & dd {
+            font-size: 11pt;
             margin-left: 0px;
+        }
+
+        & .quote {
+            color: grey;
         }
     }
 
