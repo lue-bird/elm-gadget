@@ -86,7 +86,7 @@ main =
         printed =
             IR.String.print codec firstValue
 
-        parsed = 
+        parsed =
             Parser.run (IR.String.parser codec) printed
     in
     Html.div []
