@@ -12,6 +12,9 @@ irTests =
     Test.describe "IR"
         [ roundTrip recordCodec "Record"
         , roundTrip IR.int "Int"
+        , roundTrip IR.float "Float"
+        , roundTrip IR.char "Char"
+        , roundTrip IR.string "String"
         , roundTrip (IR.list IR.bool) "List Bool"
         ]
 
