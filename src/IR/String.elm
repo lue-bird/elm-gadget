@@ -12,7 +12,7 @@ print codec value =
 
 primitive : String -> String -> String
 primitive label value =
-    label ++ "(" ++ String.replace ")" "\\)" value ++ ")"
+    label ++ "(" ++ value ++ ")"
 
 
 combinator : String -> String -> List IR.IR -> String
