@@ -129,18 +129,28 @@ decodeAdapter =
         , JD.field "custom"
             (JD.map2
                 (\selected args ->
-                    case args of
-                        [] ->
-                            Just (IR.Custom selected IR.Variant0)
+                    Maybe.map (IR.Custom selected) <|
+                        case args of
+                            [] ->
+                                Just IR.Variant0
 
-                        [ arg ] ->
-                            Just (IR.Custom selected (IR.Variant1 arg))
+                            [ arg ] ->
+                                Just (IR.Variant1 arg)
 
-                        [ arg1, arg2 ] ->
-                            Just (IR.Custom selected (IR.Variant2 arg1 arg2))
+                            [ arg1, arg2 ] ->
+                                Just (IR.Variant2 arg1 arg2)
 
-                        _ ->
-                            Nothing
+                            [ arg1, arg2, arg3 ] ->
+                                Just (IR.Variant3 arg1 arg2 arg3)
+
+                            [ arg1, arg2, arg3, arg4 ] ->
+                                Just (IR.Variant4 arg1 arg2 arg3 arg4)
+
+                            [ arg1, arg2, arg3, arg4, arg5 ] ->
+                                Just (IR.Variant5 arg1 arg2 arg3 arg4 arg5)
+
+                            _ ->
+                                Nothing
                 )
                 (JD.field "tag" JD.int)
                 (JD.field "args" (JD.list (JD.lazy (\() -> decodeAdapter))))

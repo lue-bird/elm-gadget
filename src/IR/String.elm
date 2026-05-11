@@ -181,6 +181,15 @@ customParser =
                             [ arg1, arg2 ] ->
                                 P.succeed (IR.Variant2 arg1 arg2)
 
+                            [ arg1, arg2, arg3 ] ->
+                                P.succeed (IR.Variant3 arg1 arg2 arg3)
+
+                            [ arg1, arg2, arg3, arg4 ] ->
+                                P.succeed (IR.Variant4 arg1 arg2 arg3 arg4)
+
+                            [ arg1, arg2, arg3, arg4, arg5 ] ->
+                                P.succeed (IR.Variant5 arg1 arg2 arg3 arg4 arg5)
+
                             _ ->
                                 P.problem "variant has too many args"
                     )
