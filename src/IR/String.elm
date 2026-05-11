@@ -62,6 +62,27 @@ printAdapter irValue =
                             [ arg1
                             , arg2
                             ]
+
+                        IR.Variant3 arg1 arg2 arg3 ->
+                            [ arg1
+                            , arg2
+                            , arg3
+                            ]
+
+                        IR.Variant4 arg1 arg2 arg3 arg4 ->
+                            [ arg1
+                            , arg2
+                            , arg3
+                            , arg4
+                            ]
+
+                        IR.Variant5 arg1 arg2 arg3 arg4 arg5 ->
+                            [ arg1
+                            , arg2
+                            , arg3
+                            , arg4
+                            , arg5
+                            ]
             in
             combinator
                 "u"

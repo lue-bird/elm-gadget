@@ -56,6 +56,30 @@ fuzzAdapter irType =
                                     (\a1 a2 -> IR.Custom idx (IR.Variant2 a1 a2))
                                     (fuzzAdapter arg1)
                                     (fuzzAdapter arg2)
+
+                            IR.Variant3Type arg1 arg2 arg3 ->
+                                Fuzz.map3
+                                    (\a1 a2 a3 -> IR.Custom idx (IR.Variant3 a1 a2 a3))
+                                    (fuzzAdapter arg1)
+                                    (fuzzAdapter arg2)
+                                    (fuzzAdapter arg3)
+
+                            IR.Variant4Type arg1 arg2 arg3 arg4 ->
+                                Fuzz.map4
+                                    (\a1 a2 a3 a4 -> IR.Custom idx (IR.Variant4 a1 a2 a3 a4))
+                                    (fuzzAdapter arg1)
+                                    (fuzzAdapter arg2)
+                                    (fuzzAdapter arg3)
+                                    (fuzzAdapter arg4)
+
+                            IR.Variant5Type arg1 arg2 arg3 arg4 arg5 ->
+                                Fuzz.map5
+                                    (\a1 a2 a3 a4 a5 -> IR.Custom idx (IR.Variant5 a1 a2 a3 a4 a5))
+                                    (fuzzAdapter arg1)
+                                    (fuzzAdapter arg2)
+                                    (fuzzAdapter arg3)
+                                    (fuzzAdapter arg4)
+                                    (fuzzAdapter arg5)
                     )
                     (firstVariant :: restVariants)
                 )

@@ -61,6 +61,30 @@ randomAdapter irType =
                                 (\a1 a2 -> IR.Custom idx (IR.Variant2 a1 a2))
                                 (randomAdapter arg1)
                                 (randomAdapter arg2)
+
+                        IR.Variant3Type arg1 arg2 arg3 ->
+                            Random.map3
+                                (\a1 a2 a3 -> IR.Custom idx (IR.Variant3 a1 a2 a3))
+                                (randomAdapter arg1)
+                                (randomAdapter arg2)
+                                (randomAdapter arg3)
+
+                        IR.Variant4Type arg1 arg2 arg3 arg4 ->
+                            Random.map4
+                                (\a1 a2 a3 a4 -> IR.Custom idx (IR.Variant4 a1 a2 a3 a4))
+                                (randomAdapter arg1)
+                                (randomAdapter arg2)
+                                (randomAdapter arg3)
+                                (randomAdapter arg4)
+
+                        IR.Variant5Type arg1 arg2 arg3 arg4 arg5 ->
+                            Random.map5
+                                (\a1 a2 a3 a4 a5 -> IR.Custom idx (IR.Variant5 a1 a2 a3 a4 a5))
+                                (randomAdapter arg1)
+                                (randomAdapter arg2)
+                                (randomAdapter arg3)
+                                (randomAdapter arg4)
+                                (randomAdapter arg5)
             in
             Random.Extra.choices
                 (variantTypeToGenerator 0 firstVariant)

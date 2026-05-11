@@ -5,7 +5,9 @@ module IR exposing
     , bool, char, string, int, float
     , list, array, dict, maybe, result, tuple, triple
     , succeed, andMap
-    , CustomCodec, custom, variant0, variant1, variant2, endCustom
+    , CustomCodec, custom
+    , variant0, variant1, variant2, variant3, variant4, variant5
+    , endCustom
     , map, contramap, andThen
     )
 
@@ -52,7 +54,9 @@ Convert between Elm data types and an intermediate representation (IR)
 
 ### Custom types
 
-@docs CustomCodec, custom, variant0, variant1, variant2, endCustom
+@docs CustomCodec, custom
+@docs variant0, variant1, variant2, variant3, variant4, variant5
+@docs endCustom
 
 
 ### Transforming codec input and output
@@ -101,6 +105,9 @@ type Variant
     = Variant0
     | Variant1 IR
     | Variant2 IR IR
+    | Variant3 IR IR IR
+    | Variant4 IR IR IR IR
+    | Variant5 IR IR IR IR IR
 
 
 {-| TODO
@@ -122,6 +129,9 @@ type VariantType
     = Variant0Type
     | Variant1Type IRType
     | Variant2Type IRType IRType
+    | Variant3Type IRType IRType IRType
+    | Variant4Type IRType IRType IRType IRType
+    | Variant5Type IRType IRType IRType IRType IRType
 
 
 {-| TODO
@@ -436,6 +446,153 @@ variant2 ctor (Codec arg1fns) (Codec arg2fns) (CustomCodec prev) =
                         prev.fromIR ir
         , variantTypes =
             Variant2Type arg1fns.irType arg2fns.irType
+                :: prev.variantTypes
+        }
+
+
+{-| TODO
+-}
+variant3 :
+    (arg1 -> arg2 -> arg3 -> output)
+    -> Codec arg1 arg1
+    -> Codec arg2 arg2
+    -> Codec arg3 arg3
+    -> CustomCodec ((arg1 -> arg2 -> arg3 -> IR) -> input) variantType output
+    -> CustomCodec input () output
+variant3 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (CustomCodec prev) =
+    CustomCodec
+        { match =
+            prev.match <|
+                \arg1 arg2 arg3 ->
+                    Custom prev.index
+                        (Variant3
+                            (arg1fns.fromInput arg1)
+                            (arg2fns.fromInput arg2)
+                            (arg3fns.fromInput arg3)
+                        )
+        , index = prev.index + 1
+        , fromIR =
+            \ir ->
+                case ir of
+                    Custom selected (Variant3 arg1 arg2 arg3) ->
+                        if selected == prev.index then
+                            Result.map3 ctor
+                                (arg1fns.toOutput arg1)
+                                (arg2fns.toOutput arg2)
+                                (arg3fns.toOutput arg3)
+
+                        else
+                            prev.fromIR ir
+
+                    _ ->
+                        prev.fromIR ir
+        , variantTypes =
+            Variant3Type
+                arg1fns.irType
+                arg2fns.irType
+                arg3fns.irType
+                :: prev.variantTypes
+        }
+
+
+{-| TODO
+-}
+variant4 :
+    (arg1 -> arg2 -> arg3 -> arg4 -> output)
+    -> Codec arg1 arg1
+    -> Codec arg2 arg2
+    -> Codec arg3 arg3
+    -> Codec arg4 arg4
+    -> CustomCodec ((arg1 -> arg2 -> arg3 -> arg4 -> IR) -> input) variantType output
+    -> CustomCodec input () output
+variant4 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (Codec arg4fns) (CustomCodec prev) =
+    CustomCodec
+        { match =
+            prev.match <|
+                \arg1 arg2 arg3 arg4 ->
+                    Custom prev.index
+                        (Variant4
+                            (arg1fns.fromInput arg1)
+                            (arg2fns.fromInput arg2)
+                            (arg3fns.fromInput arg3)
+                            (arg4fns.fromInput arg4)
+                        )
+        , index = prev.index + 1
+        , fromIR =
+            \ir ->
+                case ir of
+                    Custom selected (Variant4 arg1 arg2 arg3 arg4) ->
+                        if selected == prev.index then
+                            Result.map4 ctor
+                                (arg1fns.toOutput arg1)
+                                (arg2fns.toOutput arg2)
+                                (arg3fns.toOutput arg3)
+                                (arg4fns.toOutput arg4)
+
+                        else
+                            prev.fromIR ir
+
+                    _ ->
+                        prev.fromIR ir
+        , variantTypes =
+            Variant4Type
+                arg1fns.irType
+                arg2fns.irType
+                arg3fns.irType
+                arg4fns.irType
+                :: prev.variantTypes
+        }
+
+
+{-| TODO
+-}
+variant5 :
+    (arg1 -> arg2 -> arg3 -> arg4 -> arg5 -> output)
+    -> Codec arg1 arg1
+    -> Codec arg2 arg2
+    -> Codec arg3 arg3
+    -> Codec arg4 arg4
+    -> Codec arg5 arg5
+    -> CustomCodec ((arg1 -> arg2 -> arg3 -> arg4 -> arg5 -> IR) -> input) variantType output
+    -> CustomCodec input () output
+variant5 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (Codec arg4fns) (Codec arg5fns) (CustomCodec prev) =
+    CustomCodec
+        { match =
+            prev.match <|
+                \arg1 arg2 arg3 arg4 arg5 ->
+                    Custom prev.index
+                        (Variant5
+                            (arg1fns.fromInput arg1)
+                            (arg2fns.fromInput arg2)
+                            (arg3fns.fromInput arg3)
+                            (arg4fns.fromInput arg4)
+                            (arg5fns.fromInput arg5)
+                        )
+        , index = prev.index + 1
+        , fromIR =
+            \ir ->
+                case ir of
+                    Custom selected (Variant5 arg1 arg2 arg3 arg4 arg5) ->
+                        if selected == prev.index then
+                            Result.map5 ctor
+                                (arg1fns.toOutput arg1)
+                                (arg2fns.toOutput arg2)
+                                (arg3fns.toOutput arg3)
+                                (arg4fns.toOutput arg4)
+                                (arg5fns.toOutput arg5)
+
+                        else
+                            prev.fromIR ir
+
+                    _ ->
+                        prev.fromIR ir
+        , variantTypes =
+            Variant5Type
+                arg1fns.irType
+                arg2fns.irType
+                arg3fns.irType
+                arg4fns.irType
+                arg5fns.irType
                 :: prev.variantTypes
         }
 

@@ -134,6 +134,15 @@ diffHelp irType_ oldIR_ newIR_ =
                             IR.Variant2 a1 a2 ->
                                 [ a1, a2 ]
 
+                            IR.Variant3 a1 a2 a3 ->
+                                [ a1, a2, a3 ]
+
+                            IR.Variant4 a1 a2 a3 a4 ->
+                                [ a1, a2, a3, a4 ]
+
+                            IR.Variant5 a1 a2 a3 a4 a5 ->
+                                [ a1, a2, a3, a4, a5 ]
+
                     argTypesToList variantType =
                         case variantType of
                             IR.Variant0Type ->
@@ -144,6 +153,15 @@ diffHelp irType_ oldIR_ newIR_ =
 
                             IR.Variant2Type a1 a2 ->
                                 [ a1, a2 ]
+
+                            IR.Variant3Type a1 a2 a3 ->
+                                [ a1, a2, a3 ]
+
+                            IR.Variant4Type a1 a2 a3 a4 ->
+                                [ a1, a2, a3, a4 ]
+
+                            IR.Variant5Type a1 a2 a3 a4 a5 ->
+                                [ a1, a2, a3, a4, a5 ]
 
                     newArgs =
                         argsToList newVariant
@@ -381,6 +399,15 @@ default irType =
 
                     IR.Variant2Type arg1 arg2 ->
                         IR.Variant2 (default arg1) (default arg2)
+
+                    IR.Variant3Type arg1 arg2 arg3 ->
+                        IR.Variant3 (default arg1) (default arg2) (default arg3)
+
+                    IR.Variant4Type arg1 arg2 arg3 arg4 ->
+                        IR.Variant4 (default arg1) (default arg2) (default arg3) (default arg4)
+
+                    IR.Variant5Type arg1 arg2 arg3 arg4 arg5 ->
+                        IR.Variant5 (default arg1) (default arg2) (default arg3) (default arg4) (default arg5)
                 )
 
         IR.ProductType fieldTypes ->
@@ -461,6 +488,22 @@ patchHelp changes_ old_ irType_ =
             let
                 argsDict =
                     Dict.fromList diffVariant
+
+                toArgDiff idx arg argType =
+                    case Dict.get idx argsDict of
+                        Nothing ->
+                            Ok arg
+
+                        Just changes ->
+                            patchHelp changes arg argType
+
+                toArgDiffFromDefault idx argType =
+                    case Dict.get idx argsDict of
+                        Nothing ->
+                            Ok (default argType)
+
+                        Just changes ->
+                            patchHelp changes (default argType) argType
             in
             List.Extra.getAt diffSelected (firstVariantType :: restVariantTypes)
                 |> Result.fromMaybe ""
@@ -470,27 +513,25 @@ patchHelp changes_ old_ irType_ =
                             IR.Variant0Type ->
                                 Ok IR.Variant0
 
-                            IR.Variant1Type argType ->
+                            IR.Variant1Type arg1Type ->
                                 if diffSelected == oldSelected then
                                     case oldVariant of
-                                        IR.Variant1 arg ->
-                                            case Dict.get 0 argsDict of
-                                                Nothing ->
-                                                    Ok (IR.Variant1 arg)
-
-                                                Just changes ->
-                                                    Result.map IR.Variant1 (patchHelp changes arg argType)
+                                        IR.Variant1 arg1 ->
+                                            let
+                                                arg1Diff =
+                                                    toArgDiff 0 arg1 arg1Type
+                                            in
+                                            Result.map IR.Variant1 arg1Diff
 
                                         _ ->
                                             Err ""
 
                                 else
-                                    case Dict.get 0 argsDict of
-                                        Nothing ->
-                                            Ok (IR.Variant1 (default argType))
-
-                                        Just changes ->
-                                            Result.map IR.Variant1 (patchHelp changes (default argType) argType)
+                                    let
+                                        arg1Diff =
+                                            toArgDiffFromDefault 0 arg1Type
+                                    in
+                                    Result.map IR.Variant1 arg1Diff
 
                             IR.Variant2Type arg1Type arg2Type ->
                                 if diffSelected == oldSelected then
@@ -498,20 +539,10 @@ patchHelp changes_ old_ irType_ =
                                         IR.Variant2 arg1 arg2 ->
                                             let
                                                 arg1Diff =
-                                                    case Dict.get 0 argsDict of
-                                                        Nothing ->
-                                                            Ok arg1
-
-                                                        Just changes ->
-                                                            patchHelp changes arg1 arg1Type
+                                                    toArgDiff 0 arg1 arg1Type
 
                                                 arg2Diff =
-                                                    case Dict.get 1 argsDict of
-                                                        Nothing ->
-                                                            Ok arg2
-
-                                                        Just changes ->
-                                                            patchHelp changes arg2 arg2Type
+                                                    toArgDiff 1 arg2 arg2Type
                                             in
                                             Result.map2 IR.Variant2 arg1Diff arg2Diff
 
@@ -521,22 +552,126 @@ patchHelp changes_ old_ irType_ =
                                 else
                                     let
                                         arg1Diff =
-                                            case Dict.get 0 argsDict of
-                                                Nothing ->
-                                                    Ok (default arg1Type)
-
-                                                Just changes ->
-                                                    patchHelp changes (default arg1Type) arg1Type
+                                            toArgDiffFromDefault 0 arg1Type
 
                                         arg2Diff =
-                                            case Dict.get 1 argsDict of
-                                                Nothing ->
-                                                    Ok (default arg2Type)
-
-                                                Just changes ->
-                                                    patchHelp changes (default arg2Type) arg2Type
+                                            toArgDiffFromDefault 1 arg2Type
                                     in
                                     Result.map2 IR.Variant2 arg1Diff arg2Diff
+
+                            IR.Variant3Type arg1Type arg2Type arg3Type ->
+                                if diffSelected == oldSelected then
+                                    case oldVariant of
+                                        IR.Variant3 arg1 arg2 arg3 ->
+                                            let
+                                                arg1Diff =
+                                                    toArgDiff 0 arg1 arg1Type
+
+                                                arg2Diff =
+                                                    toArgDiff 1 arg2 arg2Type
+
+                                                arg3Diff =
+                                                    toArgDiff 2 arg3 arg3Type
+                                            in
+                                            Result.map3 IR.Variant3 arg1Diff arg2Diff arg3Diff
+
+                                        _ ->
+                                            Err ""
+
+                                else
+                                    let
+                                        arg1Diff =
+                                            toArgDiffFromDefault 0 arg1Type
+
+                                        arg2Diff =
+                                            toArgDiffFromDefault 1 arg2Type
+
+                                        arg3Diff =
+                                            toArgDiffFromDefault 2 arg3Type
+                                    in
+                                    Result.map3 IR.Variant3 arg1Diff arg2Diff arg3Diff
+
+                            IR.Variant4Type arg1Type arg2Type arg3Type arg4Type ->
+                                if diffSelected == oldSelected then
+                                    case oldVariant of
+                                        IR.Variant4 arg1 arg2 arg3 arg4 ->
+                                            let
+                                                arg1Diff =
+                                                    toArgDiff 0 arg1 arg1Type
+
+                                                arg2Diff =
+                                                    toArgDiff 1 arg2 arg2Type
+
+                                                arg3Diff =
+                                                    toArgDiff 2 arg3 arg3Type
+
+                                                arg4Diff =
+                                                    toArgDiff 3 arg4 arg4Type
+                                            in
+                                            Result.map4 IR.Variant4 arg1Diff arg2Diff arg3Diff arg4Diff
+
+                                        _ ->
+                                            Err ""
+
+                                else
+                                    let
+                                        arg1Diff =
+                                            toArgDiffFromDefault 0 arg1Type
+
+                                        arg2Diff =
+                                            toArgDiffFromDefault 1 arg2Type
+
+                                        arg3Diff =
+                                            toArgDiffFromDefault 2 arg3Type
+
+                                        arg4Diff =
+                                            toArgDiffFromDefault 3 arg4Type
+                                    in
+                                    Result.map4 IR.Variant4 arg1Diff arg2Diff arg3Diff arg4Diff
+
+                            IR.Variant5Type arg1Type arg2Type arg3Type arg4Type arg5Type ->
+                                if diffSelected == oldSelected then
+                                    case oldVariant of
+                                        IR.Variant5 arg1 arg2 arg3 arg4 arg5 ->
+                                            let
+                                                arg1Diff =
+                                                    toArgDiff 0 arg1 arg1Type
+
+                                                arg2Diff =
+                                                    toArgDiff 1 arg2 arg2Type
+
+                                                arg3Diff =
+                                                    toArgDiff 2 arg3 arg3Type
+
+                                                arg4Diff =
+                                                    toArgDiff 3 arg4 arg4Type
+
+                                                arg5Diff =
+                                                    toArgDiff 4 arg5 arg5Type
+                                            in
+                                            Result.map5 IR.Variant5 arg1Diff arg2Diff arg3Diff arg4Diff arg5Diff
+
+                                        _ ->
+                                            Err ""
+
+                                else
+                                    let
+                                        arg1Diff =
+                                            toArgDiffFromDefault 0 arg1Type
+
+                                        arg2Diff =
+                                            toArgDiffFromDefault 1 arg2Type
+
+                                        arg3Diff =
+                                            toArgDiffFromDefault 2 arg3Type
+
+                                        arg4Diff =
+                                            toArgDiffFromDefault 3 arg4Type
+
+                                        arg5Diff =
+                                            toArgDiffFromDefault 4 arg5Type
+                                    in
+                                    Result.map5 IR.Variant5 arg1Diff arg2Diff arg3Diff arg4Diff arg5Diff
                     )
                 |> Result.map (IR.Custom diffSelected)
 
