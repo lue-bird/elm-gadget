@@ -375,7 +375,9 @@ variant0 ctor (CustomCodec prev) =
 
                     _ ->
                         prev.fromIR ir
-        , variantTypes = Variant0Type :: prev.variantTypes
+        , variantTypes =
+            Variant0Type
+                :: prev.variantTypes
         }
 
 
@@ -387,10 +389,6 @@ variant1 :
     -> CustomCodec ((arg1 -> IR) -> input) variantType output
     -> CustomCodec input () output
 variant1 ctor (Codec argfns) (CustomCodec prev) =
-    let
-        thisVariant =
-            Variant1Type argfns.irType
-    in
     CustomCodec
         { match = prev.match <| \arg -> Custom prev.index (Variant1 (argfns.fromInput arg))
         , index = prev.index + 1
@@ -406,7 +404,9 @@ variant1 ctor (Codec argfns) (CustomCodec prev) =
 
                     _ ->
                         prev.fromIR ir
-        , variantTypes = thisVariant :: prev.variantTypes
+        , variantTypes =
+            Variant1Type argfns.irType
+                :: prev.variantTypes
         }
 
 
@@ -419,10 +419,6 @@ variant2 :
     -> CustomCodec ((arg1 -> arg2 -> IR) -> input) variantType output
     -> CustomCodec input () output
 variant2 ctor (Codec arg1fns) (Codec arg2fns) (CustomCodec prev) =
-    let
-        thisVariant =
-            Variant2Type arg1fns.irType arg2fns.irType
-    in
     CustomCodec
         { match = prev.match <| \arg1 arg2 -> Custom prev.index (Variant2 (arg1fns.fromInput arg1) (arg2fns.fromInput arg2))
         , index = prev.index + 1
@@ -438,7 +434,9 @@ variant2 ctor (Codec arg1fns) (Codec arg2fns) (CustomCodec prev) =
 
                     _ ->
                         prev.fromIR ir
-        , variantTypes = thisVariant :: prev.variantTypes
+        , variantTypes =
+            Variant2Type arg1fns.irType arg2fns.irType
+                :: prev.variantTypes
         }
 
 
