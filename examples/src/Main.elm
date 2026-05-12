@@ -75,7 +75,7 @@ main =
             IR.Diff.patch codec diff firstValue
 
         fuzzed =
-            Fuzz.examples 1 (IR.Fuzz.fuzzerWithOverrides [IR.Fuzz.override "hello world" IR.int (Fuzz.constant 1000)] codec)
+            Fuzz.examples 1 (IR.Fuzz.fuzzerWithOverrides [ IR.Fuzz.override "field2" IR.int (Fuzz.constant 1000) ] codec)
 
         encoded =
             JE.encode 2 (IR.Json.encode codec firstValue)
