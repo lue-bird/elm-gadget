@@ -1,6 +1,6 @@
 module IR.String exposing (parser, print)
 
-import IR
+import IR.Advanced as IR
 import Parser as P exposing ((|.), (|=), Parser)
 
 
@@ -27,6 +27,9 @@ combinator label meta items =
 printAdapter : IR.IR -> String
 printAdapter irValue =
     case irValue of
+        IR.Override _ x ->
+            printAdapter x
+
         IR.Bool b ->
             primitive "b"
                 (if b then

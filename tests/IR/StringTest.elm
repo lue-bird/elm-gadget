@@ -1,7 +1,7 @@
 module IR.StringTest exposing (..)
 
 import Expect
-import IR
+import IR.Advanced as IR
 import IR.Fuzz
 import IR.String
 import Parser

@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Fuzz
 import Html
-import IR
+import IR.Advanced as IR
 import IR.Diff
 import IR.Fuzz
 import IR.Html
@@ -31,7 +31,7 @@ recordCodec : IR.Codec Record Record
 recordCodec =
     IR.succeed Record
         |> IR.andMap .field1 IR.string
-        |> IR.andMap .field2 IR.int
+        |> IR.andMap .field2 (IR.int |> IR.override "field2")
 
 
 exampleCodec : IR.Codec Example Example
@@ -75,7 +75,7 @@ main =
             IR.Diff.patch codec diff firstValue
 
         fuzzed =
-            Fuzz.examples 1 (IR.Fuzz.fuzzer codec)
+            Fuzz.examples 1 (IR.Fuzz.fuzzerWithOverrides [IR.Fuzz.override "hello world" IR.int (Fuzz.constant 1000)] codec)
 
         encoded =
             JE.encode 2 (IR.Json.encode codec firstValue)

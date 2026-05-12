@@ -2,7 +2,7 @@ module IR.Html exposing (..)
 
 import Html as H
 import Html.Attributes as HA
-import IR
+import IR.Advanced as IR
 
 
 view : IR.Codec input output -> input -> H.Html msg
@@ -58,6 +58,9 @@ combinator label meta items =
 htmlAdapter : IR.IR -> H.Html msg
 htmlAdapter irValue =
     case irValue of
+        IR.Override label inner ->
+            htmlAdapter inner
+
         IR.Bool b ->
             unquotedPrimitive "Bool"
                 (if b then

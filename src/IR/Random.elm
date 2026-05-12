@@ -1,6 +1,6 @@
 module IR.Random exposing (..)
 
-import IR
+import IR.Advanced as IR
 import Random
 import Random.Char
 import Random.Extra
@@ -19,7 +19,7 @@ generator codec =
                     Ok b ->
                         Random.constant b
 
-                    Err IR.Error ->
+                    Err _ ->
                         -- let's hope this never happens...
                         generator codec
             )
@@ -28,6 +28,9 @@ generator codec =
 randomAdapter : IR.IRType -> Random.Generator IR.IR
 randomAdapter irType =
     case irType of
+        IR.OverrideType label innerType ->
+            randomAdapter innerType |> Random.map (IR.Override label)
+
         IR.BoolType ->
             Random.uniform False [ True ] |> Random.map IR.Bool
 

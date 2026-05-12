@@ -2,7 +2,7 @@ module IR.Diff exposing (..)
 
 import Dict
 import Diff as ListDiffer
-import IR
+import IR.Advanced as IR
 import List.Extra
 import Maybe.Extra
 import Result.Extra
@@ -370,6 +370,9 @@ size changes =
 default : IR.IRType -> IR.IR
 default irType =
     case irType of
+        IR.OverrideType _ x ->
+            default x
+
         IR.BoolType ->
             IR.Bool True
 
