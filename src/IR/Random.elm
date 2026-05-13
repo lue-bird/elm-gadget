@@ -1,5 +1,6 @@
-module IR.Random exposing (..)
+module IR.Random exposing (Override, generator, generatorWithOverrides, override)
 
+import Dict
 import IR
 import Random
 import Random.Char
@@ -9,25 +10,54 @@ import Random.Int
 import Random.String
 
 
-generator : IR.Codec input output -> Random.Generator output
-generator codec =
+type Override
+    = Override String (Random.Generator IR.IR)
+
+
+override : String -> IR.Codec a a -> Random.Generator a -> Override
+override label codec inputFuzzer =
+    Override label (Random.map (IR.fromInput codec) inputFuzzer)
+
+
+generatorWithOverrides : List Override -> IR.Codec input output -> Random.Generator output
+generatorWithOverrides overrides codec =
+    let
+        overridesDict =
+            overrides
+                |> List.map (\(Override label overrideFuzzer) -> ( label, overrideFuzzer ))
+                |> Dict.fromList
+    in
     IR.irType codec
-        |> randomAdapter
+        |> randomAdapter overridesDict
         |> Random.andThen
             (\irValue ->
                 case IR.toOutput codec irValue of
                     Ok b ->
                         Random.constant b
 
-                    Err IR.Error ->
+                    Err _ ->
                         -- let's hope this never happens...
                         generator codec
             )
 
 
-randomAdapter : IR.IRType -> Random.Generator IR.IR
-randomAdapter irType =
+generator : IR.Codec input output -> Random.Generator output
+generator codec =
+    generatorWithOverrides [] codec
+
+
+randomAdapter : Dict.Dict String (Random.Generator IR.IR) -> IR.IRType -> Random.Generator IR.IR
+randomAdapter overrides irType =
     case irType of
+        IR.LabelledType label innerType ->
+            Random.map (IR.Labelled label) <|
+                case Dict.get label overrides of
+                    Just override_ ->
+                        override_
+
+                    Nothing ->
+                        randomAdapter overrides innerType
+
         IR.BoolType ->
             Random.uniform False [ True ] |> Random.map IR.Bool
 
@@ -54,37 +84,37 @@ randomAdapter irType =
                         IR.Variant1Type arg ->
                             Random.map
                                 (\a -> IR.Custom idx (IR.Variant1 a))
-                                (randomAdapter arg)
+                                (randomAdapter overrides arg)
 
                         IR.Variant2Type arg1 arg2 ->
                             Random.map2
                                 (\a1 a2 -> IR.Custom idx (IR.Variant2 a1 a2))
-                                (randomAdapter arg1)
-                                (randomAdapter arg2)
+                                (randomAdapter overrides arg1)
+                                (randomAdapter overrides arg2)
 
                         IR.Variant3Type arg1 arg2 arg3 ->
                             Random.map3
                                 (\a1 a2 a3 -> IR.Custom idx (IR.Variant3 a1 a2 a3))
-                                (randomAdapter arg1)
-                                (randomAdapter arg2)
-                                (randomAdapter arg3)
+                                (randomAdapter overrides arg1)
+                                (randomAdapter overrides arg2)
+                                (randomAdapter overrides arg3)
 
                         IR.Variant4Type arg1 arg2 arg3 arg4 ->
                             Random.map4
                                 (\a1 a2 a3 a4 -> IR.Custom idx (IR.Variant4 a1 a2 a3 a4))
-                                (randomAdapter arg1)
-                                (randomAdapter arg2)
-                                (randomAdapter arg3)
-                                (randomAdapter arg4)
+                                (randomAdapter overrides arg1)
+                                (randomAdapter overrides arg2)
+                                (randomAdapter overrides arg3)
+                                (randomAdapter overrides arg4)
 
                         IR.Variant5Type arg1 arg2 arg3 arg4 arg5 ->
                             Random.map5
                                 (\a1 a2 a3 a4 a5 -> IR.Custom idx (IR.Variant5 a1 a2 a3 a4 a5))
-                                (randomAdapter arg1)
-                                (randomAdapter arg2)
-                                (randomAdapter arg3)
-                                (randomAdapter arg4)
-                                (randomAdapter arg5)
+                                (randomAdapter overrides arg1)
+                                (randomAdapter overrides arg2)
+                                (randomAdapter overrides arg3)
+                                (randomAdapter overrides arg4)
+                                (randomAdapter overrides arg5)
             in
             Random.Extra.choices
                 (variantTypeToGenerator 0 firstVariant)
@@ -92,10 +122,10 @@ randomAdapter irType =
 
         IR.ProductType fields ->
             fields
-                |> Random.Extra.traverse randomAdapter
+                |> Random.Extra.traverse (randomAdapter overrides)
                 |> Random.map IR.Product
 
         IR.ListType itemType ->
             Random.int 0 10
-                |> Random.andThen (\int -> Random.list int (randomAdapter itemType))
+                |> Random.andThen (\int -> Random.list int (randomAdapter overrides itemType))
                 |> Random.map IR.List

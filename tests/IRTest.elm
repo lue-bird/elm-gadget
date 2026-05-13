@@ -1,6 +1,7 @@
 module IRTest exposing (..)
 
 import Expect
+import Fuzz
 import IR
 import IR.Fuzz
 import Test exposing (..)
@@ -14,14 +15,14 @@ irTests =
         , roundTrip IR.int "Int"
         , roundTrip IR.float "Float"
         , roundTrip IR.char "Char"
-        , roundTrip IR.string "String"
+        , roundTrip (IR.string |> IR.label "hello world") "String"
         , roundTrip (IR.list IR.bool) "List Bool"
         ]
 
 
 roundTrip : IR.Codec input input -> String -> Test
 roundTrip codec name =
-    fuzz (IR.Fuzz.fuzzer codec) (name ++ " fromInput -> toOutput roundtrip") <|
+    fuzz (IR.Fuzz.fuzzerWithOverrides [ IR.Fuzz.override "hello world" IR.string (Fuzz.constant "hello world") ] codec) (name ++ " fromInput -> toOutput roundtrip") <|
         \rec ->
             rec
                 |> IR.fromInput codec

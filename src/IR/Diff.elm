@@ -17,8 +17,6 @@ type Diff
     | FloatChange Float
     | CharChange Char
     | StringChange String
-      -- | DictChange DictChanges
-      -- | SetChange SetChanges
     | ListChanges (List ListChange)
 
 
@@ -53,6 +51,9 @@ diffHelp irType_ oldIR_ newIR_ =
 
     else
         case ( oldIR_, newIR_, irType_ ) of
+            ( IR.Labelled _ inner1, IR.Labelled _ inner2, IR.LabelledType _ innerType ) ->
+                diffHelp innerType inner1 inner2
+
             ( IR.Bool _, IR.Bool b2, _ ) ->
                 BoolChange b2
 
@@ -315,17 +316,6 @@ size changes =
             List.map (\( _, x ) -> size x) cs
                 |> List.sum
 
-        -- DictChange { insertions, deletions } ->
-        --     Set.size deletions
-        --         + (Dict.values insertions
-        --             |> List.map size
-        --             |> List.sum
-        --           )
-        -- SetChange { insertions, deletions } ->
-        --     List.length deletions
-        --         + (List.map size insertions
-        --             |> List.sum
-        --           )
         ListChanges cs ->
             List.map
                 (\change ->
@@ -370,6 +360,9 @@ size changes =
 default : IR.IRType -> IR.IR
 default irType =
     case irType of
+        IR.LabelledType label x ->
+            IR.Labelled label (default x)
+
         IR.BoolType ->
             IR.Bool True
 
@@ -435,8 +428,12 @@ patch codec delta old =
 patchHelp : Diff -> IR.IR -> IR.IRType -> Result String IR.IR
 patchHelp changes_ old_ irType_ =
     case ( changes_, old_, irType_ ) of
-        ( Identical, any, _ ) ->
-            Ok any
+        ( Identical, _, _ ) ->
+            Ok old_
+
+        ( _, IR.Labelled label inner, IR.LabelledType _ innerType ) ->
+            patchHelp changes_ inner innerType
+                |> Result.map (IR.Labelled label)
 
         ( BoolChange b, IR.Bool _, _ ) ->
             Ok (IR.Bool b)

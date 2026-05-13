@@ -1,6 +1,6 @@
 module IR exposing
     ( Codec
-    , IR(..), Variant(..), fromInput, toOutput, Error(..)
+    , IR(..), Variant(..), fromInput, toOutput, Error
     , IRType(..), VariantType(..), irType
     , bool, char, string, int, float
     , list, array, dict, maybe, result, tuple, triple
@@ -9,6 +9,7 @@ module IR exposing
     , variant0, variant1, variant2, variant3, variant4, variant5
     , endCustom
     , map, contramap, andThen
+    , label
     )
 
 {-|
@@ -63,6 +64,11 @@ Convert between Elm data types and an intermediate representation (IR)
 
 @docs map, contramap, andThen
 
+
+### Labelling codecs
+
+@docs label
+
 -}
 
 import Array
@@ -72,8 +78,8 @@ import Result.Extra
 
 {-| TODO
 -}
-type Error
-    = Error
+type alias Error =
+    String
 
 
 {-| TODO
@@ -97,6 +103,7 @@ type IR
     | Custom Int Variant
     | Product (List IR)
     | List (List IR)
+    | Labelled String IR
 
 
 {-| TODO
@@ -121,6 +128,7 @@ type IRType
     | CustomType VariantType (List VariantType)
     | ProductType (List IRType)
     | ListType IRType
+    | LabelledType String IRType
 
 
 {-| TODO
@@ -168,7 +176,7 @@ bool =
                         Ok b
 
                     _ ->
-                        Err Error
+                        Err "bool toOutput failed"
         , irType = BoolType
         }
 
@@ -186,7 +194,7 @@ char =
                         Ok c
 
                     _ ->
-                        Err Error
+                        Err "char toOutput failed"
         , irType = CharType
         }
 
@@ -204,7 +212,7 @@ string =
                         Ok s
 
                     _ ->
-                        Err Error
+                        Err "string toOutput failed"
         , irType = StringType
         }
 
@@ -222,7 +230,7 @@ int =
                         Ok i
 
                     _ ->
-                        Err Error
+                        Err "int toOutput failed"
         , irType = IntType
         }
 
@@ -240,7 +248,7 @@ float =
                         Ok s
 
                     _ ->
-                        Err Error
+                        Err "float toOutput failed"
         , irType = FloatType
         }
 
@@ -259,7 +267,7 @@ list (Codec item) =
                             |> Result.Extra.combine
 
                     _ ->
-                        Err Error
+                        Err "list toOutput failed"
         , irType = ListType item.irType
         }
 
@@ -358,7 +366,7 @@ custom match =
     CustomCodec
         { match = match
         , index = 0
-        , fromIR = \_ -> Err Error
+        , fromIR = \_ -> Err "custom toOutput failed"
         , variantTypes = []
         }
 
@@ -632,7 +640,7 @@ succeed ctor =
                         Ok ctor
 
                     _ ->
-                        Err Error
+                        Err "succeed toOutput failed"
         , irType = ProductType []
         }
 
@@ -663,7 +671,7 @@ andMap getter (Codec this) (Codec prev) =
                             (this.toOutput thisField)
 
                     _ ->
-                        Err Error
+                        Err "andMap toOutput failed"
         , irType =
             case prev.irType of
                 ProductType prevFieldTypes ->
@@ -713,4 +721,22 @@ andThen f (Codec prev) =
         { fromInput = prev.fromInput
         , toOutput = prev.toOutput >> Result.andThen f
         , irType = prev.irType
+        }
+
+
+{-| TODO
+-}
+label : String -> Codec input output -> Codec input output
+label label_ (Codec c) =
+    Codec
+        { fromInput = c.fromInput >> Labelled label_
+        , toOutput =
+            \ir ->
+                case ir of
+                    Labelled _ innerIR ->
+                        c.toOutput innerIR
+
+                    other ->
+                        Err ("override toOutput failed " ++ Debug.toString other)
+        , irType = LabelledType label_ c.irType
         }
