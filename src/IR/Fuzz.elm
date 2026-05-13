@@ -1,4 +1,4 @@
-module IR.Fuzz exposing (..)
+module IR.Fuzz exposing (Override, fuzzer, fuzzerWithOverrides, override)
 
 import Dict
 import Fuzz
@@ -10,10 +10,16 @@ fuzzer codec =
     fuzzerWithOverrides [] codec
 
 
-fuzzerWithOverrides : List ( String, Fuzz.Fuzzer IR.IR ) -> IR.Codec input output -> Fuzz.Fuzzer output
+fuzzerWithOverrides : List Override -> IR.Codec input output -> Fuzz.Fuzzer output
 fuzzerWithOverrides overrides codec =
+    let
+        overridesDict =
+            overrides
+                |> List.map (\(Override label overrideFuzzer) -> ( label, overrideFuzzer ))
+                |> Dict.fromList
+    in
     IR.irType codec
-        |> fuzzAdapter (Dict.fromList overrides)
+        |> fuzzAdapter overridesDict
         |> Fuzz.andThen
             (\fuzzedIR ->
                 case IR.toOutput codec fuzzedIR of
@@ -25,16 +31,20 @@ fuzzerWithOverrides overrides codec =
             )
 
 
-override : String -> IR.Codec input output -> Fuzz.Fuzzer input -> ( String, Fuzz.Fuzzer IR.IR )
+type Override
+    = Override String (Fuzz.Fuzzer IR.IR)
+
+
+override : String -> IR.Codec a a -> Fuzz.Fuzzer a -> Override
 override label codec inputFuzzer =
-    ( label, Fuzz.map (IR.fromInput codec) inputFuzzer )
+    Override label (Fuzz.map (IR.fromInput codec) inputFuzzer)
 
 
 fuzzAdapter : Dict.Dict String (Fuzz.Fuzzer IR.IR) -> IR.IRType -> Fuzz.Fuzzer IR.IR
 fuzzAdapter overrides irType =
     case irType of
-        IR.OverrideType label innerType ->
-            Fuzz.map (IR.Override label)
+        IR.LabelledType label innerType ->
+            Fuzz.map (IR.Labelled label)
                 (case Dict.get label overrides of
                     Just override_ ->
                         override_

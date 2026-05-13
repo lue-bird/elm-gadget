@@ -9,7 +9,7 @@ module IR.Advanced exposing
     , variant0, variant1, variant2, variant3, variant4, variant5
     , endCustom
     , map, contramap, andThen
-    , override
+    , label
     )
 
 {-|
@@ -62,7 +62,7 @@ Convert between Elm data types and an intermediate representation (IR)
 
 ### Transforming codec input and output
 
-@docs map, contramap, andThen
+@docs map, contramap, andThen, override
 
 -}
 
@@ -98,7 +98,7 @@ type IR
     | Custom Int Variant
     | Product (List IR)
     | List (List IR)
-    | Override String IR
+    | Labelled String IR
 
 
 {-| TODO
@@ -123,7 +123,7 @@ type IRType
     | CustomType VariantType (List VariantType)
     | ProductType (List IRType)
     | ListType IRType
-    | OverrideType String IRType
+    | LabelledType String IRType
 
 
 {-| TODO
@@ -156,22 +156,6 @@ irType (Codec c) =
 toOutput : Codec input output -> IR -> Result Error output
 toOutput (Codec c) a =
     c.toOutput a
-
-
-override : String -> Codec input output -> Codec input output
-override label (Codec c) =
-    Codec
-        { fromInput = c.fromInput >> Override label
-        , toOutput =
-            \ir ->
-                case ir of
-                    Override _ innerIR ->
-                        c.toOutput innerIR
-
-                    other ->
-                        Err ("override toOutput failed " ++ Debug.toString other)
-        , irType = OverrideType label c.irType
-        }
 
 
 {-| TODO
@@ -732,4 +716,22 @@ andThen f (Codec prev) =
         { fromInput = prev.fromInput
         , toOutput = prev.toOutput >> Result.andThen f
         , irType = prev.irType
+        }
+
+
+{-| TODO
+-}
+label : String -> Codec input output -> Codec input output
+label label_ (Codec c) =
+    Codec
+        { fromInput = c.fromInput >> Labelled label_
+        , toOutput =
+            \ir ->
+                case ir of
+                    Labelled _ innerIR ->
+                        c.toOutput innerIR
+
+                    other ->
+                        Err ("override toOutput failed " ++ Debug.toString other)
+        , irType = LabelledType label_ c.irType
         }

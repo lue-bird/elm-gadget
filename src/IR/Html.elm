@@ -13,40 +13,50 @@ view codec value =
         |> H.article [ HA.class "elm-ir" ]
 
 
-primitive : H.Html msg -> String -> String -> H.Html msg
-primitive quote label value =
+primitive : H.Html msg -> (String -> H.Html msg) -> String -> String -> H.Html msg
+primitive quoteHtml valueWrapper typeName value =
     H.dl []
-        [ H.div [ HA.class "primitive", HA.class label ]
+        [ H.div [ HA.class "primitive", HA.class typeName ]
+            [ H.dt [] [ H.em [] [ H.text typeName ] ]
+            , H.dd [] [ H.span [] [ quoteHtml, valueWrapper value, quoteHtml ] ]
+            ]
+        ]
+
+
+labelled : String -> H.Html msg -> H.Html msg
+labelled label inner =
+    H.dl []
+        [ H.div [ HA.class "labelled" ]
             [ H.dt [] [ H.strong [] [ H.text label ] ]
-            , H.dd [] [ H.span [] [ quote, H.code [] [ H.text value ], quote ] ]
+            , H.dd [] [ inner ]
             ]
         ]
 
 
 quotedPrimitive : String -> String -> String -> H.Html msg
 quotedPrimitive quote =
-    primitive (H.span [ HA.class "quote" ] [ H.text quote ])
+    primitive (H.span [ HA.class "quote" ] [ H.text quote ]) (\value -> H.code [] [ H.text value ])
 
 
 unquotedPrimitive : String -> String -> H.Html msg
 unquotedPrimitive =
-    primitive (H.text "")
+    primitive (H.text "") (\value -> H.code [] [ H.text value ])
 
 
 combinator : String -> String -> List IR.IR -> H.Html msg
-combinator label meta items =
+combinator typeName meta items =
     if List.isEmpty items then
-        H.div [ HA.class "combinator", HA.class label ]
+        H.div [ HA.class "combinator", HA.class typeName ]
             [ H.summary []
-                [ H.strong [] [ H.text label ]
+                [ H.strong [] [ H.text typeName ]
                 , H.text (" " ++ meta)
                 ]
             ]
 
     else
-        H.details [ HA.class "combinator", HA.class label ]
+        H.details [ HA.class "combinator", HA.class typeName ]
             [ H.summary []
-                [ H.strong [] [ H.text label ]
+                [ H.strong [] [ H.text typeName ]
                 , H.text (" " ++ meta)
                 ]
             , H.ol
@@ -58,8 +68,8 @@ combinator label meta items =
 htmlAdapter : IR.IR -> H.Html msg
 htmlAdapter irValue =
     case irValue of
-        IR.Override label inner ->
-            htmlAdapter inner
+        IR.Labelled label inner ->
+            labelled label (htmlAdapter inner)
 
         IR.Bool b ->
             unquotedPrimitive "Bool"

@@ -27,8 +27,8 @@ combinator label meta items =
 printAdapter : IR.IR -> String
 printAdapter irValue =
     case irValue of
-        IR.Override _ x ->
-            printAdapter x
+        IR.Labelled label inner ->
+            "x" ++ quoteString label ++ printAdapter inner
 
         IR.Bool b ->
             primitive "b"
@@ -125,6 +125,7 @@ irParser =
         [ primitiveParser "b" IR.Bool boolParser
         , primitiveParser "i" IR.Int intParser
         , primitiveParser "f" IR.Float floatParser
+        , labelledParser
         , charParser
         , stringParser
         , listParser
@@ -337,6 +338,14 @@ floatParserHelp =
                         Nothing ->
                             P.problem "Not a Float"
             )
+
+
+labelledParser : Parser IR.IR
+labelledParser =
+    P.succeed IR.Labelled
+        |. P.token "x("
+        |= P.loop "" stringParserHelp
+        |= P.lazy (\() -> irParser)
 
 
 {-| This function comes from

@@ -29,7 +29,7 @@ decoder codec =
 encodeAdapter : IR.IR -> JE.Value
 encodeAdapter irValue =
     case irValue of
-        IR.Override label innerValue ->
+        IR.Labelled label innerValue ->
             JE.object
                 [ ( "override"
                   , JE.object
@@ -123,7 +123,7 @@ decodeAdapter : JD.Decoder IR.IR
 decodeAdapter =
     JD.oneOf
         [ JD.field "override"
-            (JD.map2 (\label value -> IR.Override label value)
+            (JD.map2 (\label value -> IR.Labelled label value)
                 (JD.field "label" JD.string)
                 (JD.field "value" (JD.lazy (\() -> decodeAdapter)))
             )
