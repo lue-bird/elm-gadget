@@ -71,9 +71,18 @@ main {
         flex-direction: row;
         align-items: center;
         gap: 10px;
+        background-color: hsl(from var(--combinator-bg) 260deg s l);
 
         & dt {
-            font-size: 8pt;
+            display: flex;
+            flex-direction: column;
+
+
+            font-size: 11pt;
+
+            & em {
+                font-size: 8pt;
+            }
         }
 
         & dd {
