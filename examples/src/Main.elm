@@ -60,12 +60,20 @@ main =
         codec =
             IR.list exampleCodec
 
-        randomOverrides = 
-            [ IR.Random.override "field1" IR.string (Random.uniform "Ed" ["Mario", "Leonardo", "Jeroen"]) 
-            , IR.Random.override "field2" IR.int (Random.constant 1000) 
+        fuzzOverrides =
+            [ IR.Fuzz.override "field1" IR.string (Fuzz.oneOf (List.map Fuzz.constant [ "Ed", "Mario", "Leonardo", "Jeroen" ]))
+            , IR.Fuzz.override "field2" IR.int (Fuzz.constant 500)
             ]
-        
-        randomGenerator = 
+
+        fuzzed =
+            Fuzz.examples 1 (IR.Fuzz.fuzzerWithOverrides fuzzOverrides codec)
+
+        randomOverrides =
+            [ IR.Random.override "field1" IR.string (Random.uniform "Ed" [ "Mario", "Leonardo", "Jeroen" ])
+            , IR.Random.override "field2" IR.int (Random.constant 1000)
+            ]
+
+        randomGenerator =
             IR.Random.generatorWithOverrides randomOverrides codec
 
         firstValue =
@@ -81,13 +89,6 @@ main =
 
         patched =
             IR.Diff.patch codec diff firstValue
-
-        fuzzOverrides = 
-            [ IR.Fuzz.override "field2" IR.int (Fuzz.constant 1000) 
-            ]
-        
-        fuzzed =
-            Fuzz.examples 1 (IR.Fuzz.fuzzerWithOverrides fuzzOverrides codec)
 
         encoded =
             JE.encode 2 (IR.Json.encode codec firstValue)
