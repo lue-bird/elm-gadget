@@ -58,15 +58,18 @@ main : Html.Html msg
 main =
     let
         codec =
-            IR.list exampleCodec
+            exampleCodec
 
         fuzzOverrides =
             [ IR.Fuzz.override "field1" IR.string (Fuzz.oneOf (List.map Fuzz.constant [ "Ed", "Mario", "Leonardo", "Jeroen" ]))
             , IR.Fuzz.override "field2" IR.int (Fuzz.constant 500)
             ]
 
+        fuzzer =
+            IR.Fuzz.fuzzerWithOverrides fuzzOverrides codec
+
         fuzzed =
-            Fuzz.examples 1 (IR.Fuzz.fuzzerWithOverrides fuzzOverrides codec)
+            Fuzz.examples 1 fuzzer
 
         randomOverrides =
             [ IR.Random.override "field1" IR.string (Random.uniform "Ed" [ "Mario", "Leonardo", "Jeroen" ])
