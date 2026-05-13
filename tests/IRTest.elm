@@ -15,7 +15,7 @@ irTests =
         , roundTrip IR.int "Int"
         , roundTrip IR.float "Float"
         , roundTrip IR.char "Char"
-        , roundTrip (IR.string |> IR.override "hello world") "String"
+        , roundTrip (IR.string |> IR.label "hello world") "String"
         , roundTrip (IR.list IR.bool) "List Bool"
         ]
 

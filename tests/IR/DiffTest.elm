@@ -12,7 +12,7 @@ diffTests : Test
 diffTests =
     Test.describe "IR.Diff"
         [ roundTrip recordCodec "Record"
-        , roundTrip IR.int "Int"
+        , roundTrip (IR.int |> IR.label "label") "Int"
         , roundTrip IR.float "Float"
         , roundTrip IR.char "Char"
         , roundTrip IR.string "String"
