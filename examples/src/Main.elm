@@ -30,8 +30,8 @@ type alias Record =
 recordCodec : IR.Codec Record Record
 recordCodec =
     IR.succeed Record
-        |> IR.andMap .field1 IR.string
-        |> IR.andMap .field2 (IR.int |> IR.override "field2")
+        |> IR.andMap .field1 (IR.string |> IR.label "field1")
+        |> IR.andMap .field2 (IR.int |> IR.label "field2")
 
 
 exampleCodec : IR.Codec Example Example
@@ -39,8 +39,8 @@ exampleCodec =
     IR.custom
         (\red yellow green value ->
             case value of
-                Red b s ->
-                    red b s
+                Red c l ->
+                    red c l
 
                 Yellow ->
                     yellow
@@ -60,12 +60,20 @@ main =
         codec =
             IR.list exampleCodec
 
+        randomOverrides = 
+            [ IR.Random.override "field1" IR.string (Random.uniform "Ed" ["Mario", "Leonardo", "Jeroen"]) 
+            , IR.Random.override "field2" IR.int (Random.constant 1000) 
+            ]
+        
+        randomGenerator = 
+            IR.Random.generatorWithOverrides randomOverrides codec
+
         firstValue =
-            Random.step (IR.Random.generator codec) (Random.initialSeed 14)
+            Random.step randomGenerator (Random.initialSeed 14)
                 |> Tuple.first
 
         secondValue =
-            Random.step (IR.Random.generator codec) (Random.initialSeed 16)
+            Random.step randomGenerator (Random.initialSeed 16)
                 |> Tuple.first
 
         diff =
@@ -74,8 +82,12 @@ main =
         patched =
             IR.Diff.patch codec diff firstValue
 
+        fuzzOverrides = 
+            [ IR.Fuzz.override "field2" IR.int (Fuzz.constant 1000) 
+            ]
+        
         fuzzed =
-            Fuzz.examples 1 (IR.Fuzz.fuzzerWithOverrides [ IR.Fuzz.override "field2" IR.int (Fuzz.constant 1000) ] codec)
+            Fuzz.examples 1 (IR.Fuzz.fuzzerWithOverrides fuzzOverrides codec)
 
         encoded =
             JE.encode 2 (IR.Json.encode codec firstValue)
