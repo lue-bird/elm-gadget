@@ -85,7 +85,9 @@ unused =
 
 
 simplify =
-    [ Simplify.rule Simplify.defaults
+    [  Simplify.defaults 
+        |> Simplify.expectNaN 
+        |> Simplify.rule
     ]
         |> ignoreDocSnippets
 
