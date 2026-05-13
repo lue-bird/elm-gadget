@@ -1,7 +1,19 @@
+body {
+    background-color: ghostwhite;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+main {
+    margin: 40px;
+    padding: 40px;
+    border: 1px rgb(230, 230, 230) solid;
+    background-color: white;
+}
+
 .elm-ir {
     --primitive-bg: hsl(0 100 95);
     --combinator-bg: hsl(0 100 99);
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+
 
     & ol {
         display: flex;
@@ -49,6 +61,26 @@
         & .quote {
             color: grey;
         }
+    }
+
+    & .labelled {
+        border: solid black 1px;
+        border-radius: 5px;
+        padding: 5px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+
+        & dt {
+            font-size: 8pt;
+        }
+
+        & dd {
+            font-size: 11pt;
+            margin-left: 0px;
+        }
+
     }
 
     & .combinator {
