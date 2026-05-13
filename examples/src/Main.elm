@@ -22,16 +22,16 @@ type Example
 
 
 type alias Record =
-    { field1 : String
-    , field2 : Int
+    { name : String
+    , number : Int
     }
 
 
 recordCodec : IR.Codec Record Record
 recordCodec =
     IR.succeed Record
-        |> IR.andMap .field1 (IR.string |> IR.label "field1")
-        |> IR.andMap .field2 (IR.int |> IR.label "field2")
+        |> IR.andMap .name (IR.string |> IR.label "name")
+        |> IR.andMap .number (IR.int |> IR.label "number")
 
 
 exampleCodec : IR.Codec Example Example
@@ -61,8 +61,8 @@ main =
             exampleCodec
 
         fuzzOverrides =
-            [ IR.Fuzz.override "field1" IR.string (Fuzz.oneOf (List.map Fuzz.constant [ "Ed", "Mario", "Leonardo", "Jeroen" ]))
-            , IR.Fuzz.override "field2" IR.int (Fuzz.constant 500)
+            [ IR.Fuzz.override "name" IR.string (Fuzz.oneOf (List.map Fuzz.constant [ "Ed", "Mario", "Leonardo", "Jeroen" ]))
+            , IR.Fuzz.override "number" IR.int (Fuzz.constant 500)
             ]
 
         fuzzer =
@@ -72,19 +72,19 @@ main =
             Fuzz.examples 1 fuzzer
 
         randomOverrides =
-            [ IR.Random.override "field1" IR.string (Random.uniform "Ed" [ "Mario", "Leonardo", "Jeroen" ])
-            , IR.Random.override "field2" IR.int (Random.constant 1000)
+            [ IR.Random.override "name" IR.string (Random.uniform "Ed" [ "Mario", "Leonardo", "Jeroen" ])
+            , IR.Random.override "number" IR.int (Random.constant 1000)
             ]
 
         randomGenerator =
             IR.Random.generatorWithOverrides randomOverrides codec
 
         firstValue =
-            Random.step randomGenerator (Random.initialSeed 14)
+            Random.step randomGenerator (Random.initialSeed 0)
                 |> Tuple.first
 
         secondValue =
-            Random.step randomGenerator (Random.initialSeed 16)
+            Random.step randomGenerator (Random.initialSeed 4)
                 |> Tuple.first
 
         diff =
@@ -106,7 +106,8 @@ main =
             Parser.run (IR.String.parser codec) printed
     in
     Html.div []
-        [ head "IR type"
+        [ Html.h1 [] [ Html.text "elm-ir examples" ]
+        , head "IR type"
         , show (IR.irType codec)
         , head "Random generator (first value)"
         , show firstValue
@@ -120,6 +121,8 @@ main =
         , show (patched == Ok secondValue)
         , head "Html viewer (first value)"
         , IR.Html.view codec firstValue
+        , head "Html viewer (second value)"
+        , IR.Html.view codec secondValue
         , head "Printer (first value)"
         , Html.pre [] [ Html.text printed ]
         , head "Parser (first value)"
