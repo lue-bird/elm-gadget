@@ -1,7 +1,7 @@
 module IR.Random exposing (Override, generator, generatorWithOverrides, override)
 
 import Dict
-import IR.Advanced as IR
+import IR
 import Random
 import Random.Char
 import Random.Extra

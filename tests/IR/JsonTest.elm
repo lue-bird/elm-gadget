@@ -1,7 +1,7 @@
 module IR.JsonTest exposing (..)
 
 import Expect
-import IR.Advanced as IR
+import IR
 import IR.Fuzz
 import IR.Json
 import Json.Decode

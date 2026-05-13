@@ -2,7 +2,7 @@ module IR.Fuzz exposing (Override, fuzzer, fuzzerWithOverrides, override)
 
 import Dict
 import Fuzz
-import IR.Advanced as IR
+import IR
 
 
 fuzzer : IR.Codec input output -> Fuzz.Fuzzer output

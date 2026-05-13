@@ -5,7 +5,7 @@ module DocumentationCodeSnippetTest exposing (tests)
 
 import Expect
 import Fuzz
-import IR.Advanced
+import IR
 import IR.Fuzz
 import IR.Json
 import Json.Decode
@@ -25,11 +25,7 @@ tests =
                     (\() ->
                         ir__Readme_0
                             |> Expect.equal
-                                (IR.Advanced.Product
-                                    [ IR.Advanced.Int 44
-                                    , IR.Advanced.String "Ed"
-                                    ]
-                                )
+                                (IR.Product [ IR.Int 44, IR.String "Ed" ])
                     )
                 , Test.test
                     "1"
@@ -72,20 +68,20 @@ input__Readme_0 =
     { name = "Ed", age = 44 }
 
 
-codec__Readme_0 : IR.Advanced.Codec User__Readme_0 User__Readme_0
+codec__Readme_0 : IR.Codec User__Readme_0 User__Readme_0
 codec__Readme_0 =
-    IR.Advanced.succeed User__Readme_0
-        |> IR.Advanced.andMap .name IR.Advanced.string
-        |> IR.Advanced.andMap .age IR.Advanced.int
+    IR.succeed User__Readme_0
+        |> IR.andMap .name IR.string
+        |> IR.andMap .age IR.int
 
 
-ir__Readme_0 : IR.Advanced.IR
+ir__Readme_0 : IR.IR
 ir__Readme_0 =
-    IR.Advanced.fromInput codec__Readme_0 input__Readme_0
+    IR.fromInput codec__Readme_0 input__Readme_0
 
 
 output__Readme_0 =
-    IR.Advanced.toOutput codec__Readme_0 ir__Readme_0
+    IR.toOutput codec__Readme_0 ir__Readme_0
 
 
 json__Readme_0 =

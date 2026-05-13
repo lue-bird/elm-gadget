@@ -1,6 +1,6 @@
 module TestHelpers exposing (..)
 
-import IR.Advanced as IR
+import IR
 
 
 type alias Record =

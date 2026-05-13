@@ -1,7 +1,7 @@
 module IR.DiffTest exposing (..)
 
 import Expect
-import IR.Advanced as IR
+import IR
 import IR.Diff
 import IR.Fuzz
 import Test exposing (..)

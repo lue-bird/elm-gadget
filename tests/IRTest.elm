@@ -2,7 +2,7 @@ module IRTest exposing (..)
 
 import Expect
 import Fuzz
-import IR.Advanced as IR
+import IR
 import IR.Fuzz
 import Test exposing (..)
 import TestHelpers exposing (..)

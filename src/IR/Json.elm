@@ -1,6 +1,6 @@
 module IR.Json exposing (..)
 
-import IR.Advanced as IR
+import IR
 import Json.Decode as JD
 import Json.Encode as JE
 

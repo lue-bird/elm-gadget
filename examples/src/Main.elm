@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Fuzz
 import Html
-import IR.Advanced as IR
+import IR
 import IR.Diff
 import IR.Fuzz
 import IR.Html

@@ -17,7 +17,7 @@ Do `npx run-pty run-pty.json` in the project root folder.
 ## How?
 
 ```elm
-import IR.Advanced as IR
+import IR
 import IR.Fuzz
 import IR.Json
 import Fuzz

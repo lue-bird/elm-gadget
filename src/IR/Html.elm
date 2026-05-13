@@ -2,7 +2,7 @@ module IR.Html exposing (..)
 
 import Html as H
 import Html.Attributes as HA
-import IR.Advanced as IR
+import IR
 
 
 view : IR.Codec input output -> input -> H.Html msg
@@ -27,7 +27,10 @@ labelled : String -> H.Html msg -> H.Html msg
 labelled label inner =
     H.dl []
         [ H.div [ HA.class "labelled" ]
-            [ H.dt [] [ H.strong [] [ H.text label ] ]
+            [ H.dt []
+                [ H.em [] [ H.text "Label" ]
+                , H.code [] [ H.text label ]
+                ]
             , H.dd [] [ inner ]
             ]
         ]

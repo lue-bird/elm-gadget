@@ -2,7 +2,7 @@ module IR.Diff exposing (..)
 
 import Dict
 import Diff as ListDiffer
-import IR.Advanced as IR
+import IR
 import List.Extra
 import Maybe.Extra
 import Result.Extra
@@ -51,7 +51,7 @@ diffHelp irType_ oldIR_ newIR_ =
 
     else
         case ( oldIR_, newIR_, irType_ ) of
-            ( IR.Labelled label inner1, IR.Labelled _ inner2, IR.LabelledType _ innerType ) ->
+            ( IR.Labelled _ inner1, IR.Labelled _ inner2, IR.LabelledType _ innerType ) ->
                 diffHelp innerType inner1 inner2
 
             ( IR.Bool _, IR.Bool b2, _ ) ->
