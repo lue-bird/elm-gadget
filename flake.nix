@@ -41,7 +41,7 @@
           fi
           
           git config --local core.hooksPath "$DEVDIR/.githooks/"
-          chmod +x "$DEVDIR/.githooks/generate_docs_json.sh"
+          chmod +x "$DEVDIR/.githooks/pre-commit"
 
           echo -e "\033[1;36mrun\033[0m: start the development environment"
 

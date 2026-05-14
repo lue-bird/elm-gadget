@@ -6,4 +6,7 @@ if elm make --docs=docs.json; then
     echo "Success!"
 else 
     echo "Failed!"
+    exit 1
 fi
+
+exit 0
