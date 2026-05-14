@@ -29,7 +29,7 @@ type alias Record =
 
 recordCodec : IR.Codec Record Record
 recordCodec =
-    IR.succeed Record 
+    IR.succeed Record
         |> IR.andMap .name (IR.string |> IR.label "name")
         |> IR.andMap .number (IR.int |> IR.label "number")
 

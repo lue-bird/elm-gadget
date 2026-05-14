@@ -2,12 +2,22 @@
 
 echo "Generating docs.json..."
 
-if elm make --docs=docs.json; then
-    git add docs.json
+if elm make --docs=docs.json > /dev/null 2>&1; then
     echo "Success!"
 else 
     echo "Failed!"
     exit 1
 fi
+
+echo "Running elm-format..."
+
+if elm-format . --yes > /dev/null 2>&1; then
+    echo "Success!"
+else 
+    echo "Failed!"
+    exit 1
+fi
+
+git add .
 
 exit 0
