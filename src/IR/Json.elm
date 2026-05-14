@@ -5,14 +5,14 @@ import Json.Decode as JD
 import Json.Encode as JE
 
 
-encode : IR.Codec input output -> input -> JE.Value
+encode : IR.Codec a -> a -> JE.Value
 encode codec value =
     value
         |> IR.fromInput codec
         |> encodeAdapter
 
 
-decoder : IR.Codec input output -> JD.Decoder output
+decoder : IR.Codec a -> JD.Decoder a
 decoder codec =
     decodeAdapter
         |> JD.andThen

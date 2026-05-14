@@ -5,7 +5,7 @@ import Html.Attributes as HA
 import IR
 
 
-view : IR.Codec input output -> input -> H.Html msg
+view : IR.Codec a -> a -> H.Html msg
 view codec value =
     IR.fromInput codec value
         |> htmlAdapter

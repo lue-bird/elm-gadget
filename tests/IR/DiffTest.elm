@@ -20,7 +20,7 @@ diffTests =
         ]
 
 
-roundTrip : IR.Codec b b -> String -> Test
+roundTrip : IR.Codec b -> String -> Test
 roundTrip codec name =
     fuzz2
         (IR.Fuzz.fuzzer codec)

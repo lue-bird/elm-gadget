@@ -29,7 +29,7 @@ type ListChange
     | Repeat Int ListChange
 
 
-diff : IR.Codec output output -> output -> output -> Diff
+diff : IR.Codec a -> a -> a -> Diff
 diff codec old new =
     let
         oldIR =
@@ -407,7 +407,7 @@ default irType =
             IR.Product (List.map default fieldTypes)
 
 
-patch : IR.Codec a a -> Diff -> a -> Result String a
+patch : IR.Codec a -> Diff -> a -> Result String a
 patch codec delta old =
     let
         oldIR =

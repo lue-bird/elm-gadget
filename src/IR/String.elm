@@ -4,7 +4,7 @@ import IR
 import Parser as P exposing ((|.), (|=), Parser)
 
 
-print : IR.Codec input output -> input -> String
+print : IR.Codec a -> a -> String
 print codec value =
     IR.fromInput codec value
         |> printAdapter
@@ -105,7 +105,7 @@ printAdapter irValue =
                 items
 
 
-parser : IR.Codec input output -> Parser output
+parser : IR.Codec a -> Parser a
 parser codec =
     irParser
         |> P.andThen

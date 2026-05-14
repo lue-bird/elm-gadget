@@ -4,7 +4,7 @@ module IR exposing
     , IRType(..), VariantType(..), irType
     , bool, char, string, int, float
     , list, array, dict, set, maybe, result, tuple, triple
-    , succeed, andMap
+    , Transformer, record, field, endRecord
     , CustomCodec, custom
     , variant0, variant1, variant2, variant3, variant4, variant5
     , endCustom
@@ -50,7 +50,7 @@ Convert between Elm data types and an intermediate representation (IR)
 
 ### Record types
 
-@docs succeed, andMap
+@docs Transformer, record, field, endRecord
 
 
 ### Custom types
@@ -85,7 +85,13 @@ type alias Error =
 
 {-| TODO
 -}
-type Codec input output
+type alias Codec a =
+    Transformer a a
+
+
+{-| TODO
+-}
+type Transformer input output
     = Codec
         { fromInput : input -> IR
         , toOutput : IR -> Result Error output
@@ -145,28 +151,28 @@ type VariantType
 
 {-| TODO
 -}
-fromInput : Codec input output -> input -> IR
+fromInput : Codec a -> a -> IR
 fromInput (Codec c) input =
     c.fromInput input
 
 
 {-| TODO
 -}
-irType : Codec input output -> IRType
+irType : Codec a -> IRType
 irType (Codec c) =
     c.irType
 
 
 {-| TODO
 -}
-toOutput : Codec input output -> IR -> Result Error output
+toOutput : Codec a -> IR -> Result Error a
 toOutput (Codec c) a =
     c.toOutput a
 
 
 {-| TODO
 -}
-bool : Codec Bool Bool
+bool : Codec Bool
 bool =
     Codec
         { fromInput = Bool
@@ -184,7 +190,7 @@ bool =
 
 {-| TODO
 -}
-char : Codec Char Char
+char : Codec Char
 char =
     Codec
         { fromInput = Char
@@ -202,7 +208,7 @@ char =
 
 {-| TODO
 -}
-string : Codec String String
+string : Codec String
 string =
     Codec
         { fromInput = String
@@ -220,7 +226,7 @@ string =
 
 {-| TODO
 -}
-int : Codec Int Int
+int : Codec Int
 int =
     Codec
         { fromInput = Int
@@ -238,7 +244,7 @@ int =
 
 {-| TODO
 -}
-float : Codec Float Float
+float : Codec Float
 float =
     Codec
         { fromInput = Float
@@ -256,7 +262,7 @@ float =
 
 {-| TODO
 -}
-list : Codec input output -> Codec (List input) (List output)
+list : Codec a -> Codec (List a)
 list (Codec item) =
     Codec
         { fromInput = \items -> List (List.map item.fromInput items)
@@ -276,9 +282,9 @@ list (Codec item) =
 {-| TODO
 -}
 dict :
-    Codec comparable comparable
-    -> Codec v v
-    -> Codec (Dict.Dict comparable v) (Dict.Dict comparable v)
+    Codec comparable
+    -> Codec v
+    -> Codec (Dict.Dict comparable v)
 dict key value =
     list (tuple key value)
         |> contramap Dict.toList
@@ -288,8 +294,8 @@ dict key value =
 {-| TODO
 -}
 set :
-    Codec comparable comparable
-    -> Codec (Set.Set comparable) (Set.Set comparable)
+    Codec comparable
+    -> Codec (Set.Set comparable)
 set value =
     list value
         |> contramap Set.toList
@@ -298,7 +304,7 @@ set value =
 
 {-| TODO
 -}
-array : Codec a a -> Codec (Array.Array a) (Array.Array a)
+array : Codec a -> Codec (Array.Array a)
 array item =
     list item
         |> contramap Array.toList
@@ -307,7 +313,7 @@ array item =
 
 {-| TODO
 -}
-maybe : Codec a a -> Codec (Maybe a) (Maybe a)
+maybe : Codec a -> Codec (Maybe a)
 maybe item =
     custom
         (\just nothing variant ->
@@ -325,7 +331,7 @@ maybe item =
 
 {-| TODO
 -}
-result : Codec x x -> Codec a a -> Codec (Result x a) (Result x a)
+result : Codec x -> Codec a -> Codec (Result x a)
 result x a =
     custom
         (\err ok variant ->
@@ -343,21 +349,23 @@ result x a =
 
 {-| TODO
 -}
-tuple : Codec a a -> Codec b b -> Codec ( a, b ) ( a, b )
+tuple : Codec a -> Codec b -> Codec ( a, b )
 tuple a b =
-    succeed Tuple.pair
-        |> andMap Tuple.first a
-        |> andMap Tuple.second b
+    record Tuple.pair
+        |> field Tuple.first a
+        |> field Tuple.second b
+        |> endRecord
 
 
 {-| TODO
 -}
-triple : Codec a a -> Codec b b -> Codec c c -> Codec ( a, b, c ) ( a, b, c )
+triple : Codec a -> Codec b -> Codec c -> Codec ( a, b, c )
 triple a b c =
-    succeed (\a_ b_ c_ -> ( a_, b_, c_ ))
-        |> andMap (\( a_, _, _ ) -> a_) a
-        |> andMap (\( _, b_, _ ) -> b_) b
-        |> andMap (\( _, _, c_ ) -> c_) c
+    record (\a_ b_ c_ -> ( a_, b_, c_ ))
+        |> field (\( a_, _, _ ) -> a_) a
+        |> field (\( _, b_, _ ) -> b_) b
+        |> field (\( _, _, c_ ) -> c_) c
+        |> endRecord
 
 
 {-| TODO
@@ -415,7 +423,7 @@ variant0 ctor (CustomCodec prev) =
 -}
 variant1 :
     (arg1 -> output)
-    -> Codec arg1 arg1
+    -> Codec arg1
     -> CustomCodec ((arg1 -> IR) -> input) variantType output
     -> CustomCodec input () output
 variant1 ctor (Codec argfns) (CustomCodec prev) =
@@ -444,8 +452,8 @@ variant1 ctor (Codec argfns) (CustomCodec prev) =
 -}
 variant2 :
     (arg1 -> arg2 -> output)
-    -> Codec arg1 arg1
-    -> Codec arg2 arg2
+    -> Codec arg1
+    -> Codec arg2
     -> CustomCodec ((arg1 -> arg2 -> IR) -> input) variantType output
     -> CustomCodec input () output
 variant2 ctor (Codec arg1fns) (Codec arg2fns) (CustomCodec prev) =
@@ -474,9 +482,9 @@ variant2 ctor (Codec arg1fns) (Codec arg2fns) (CustomCodec prev) =
 -}
 variant3 :
     (arg1 -> arg2 -> arg3 -> output)
-    -> Codec arg1 arg1
-    -> Codec arg2 arg2
-    -> Codec arg3 arg3
+    -> Codec arg1
+    -> Codec arg2
+    -> Codec arg3
     -> CustomCodec ((arg1 -> arg2 -> arg3 -> IR) -> input) variantType output
     -> CustomCodec input () output
 variant3 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (CustomCodec prev) =
@@ -519,10 +527,10 @@ variant3 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (CustomCodec prev)
 -}
 variant4 :
     (arg1 -> arg2 -> arg3 -> arg4 -> output)
-    -> Codec arg1 arg1
-    -> Codec arg2 arg2
-    -> Codec arg3 arg3
-    -> Codec arg4 arg4
+    -> Codec arg1
+    -> Codec arg2
+    -> Codec arg3
+    -> Codec arg4
     -> CustomCodec ((arg1 -> arg2 -> arg3 -> arg4 -> IR) -> input) variantType output
     -> CustomCodec input () output
 variant4 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (Codec arg4fns) (CustomCodec prev) =
@@ -568,11 +576,11 @@ variant4 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (Codec arg4fns) (C
 -}
 variant5 :
     (arg1 -> arg2 -> arg3 -> arg4 -> arg5 -> output)
-    -> Codec arg1 arg1
-    -> Codec arg2 arg2
-    -> Codec arg3 arg3
-    -> Codec arg4 arg4
-    -> Codec arg5 arg5
+    -> Codec arg1
+    -> Codec arg2
+    -> Codec arg3
+    -> Codec arg4
+    -> Codec arg5
     -> CustomCodec ((arg1 -> arg2 -> arg3 -> arg4 -> arg5 -> IR) -> input) variantType output
     -> CustomCodec input () output
 variant5 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (Codec arg4fns) (Codec arg5fns) (CustomCodec prev) =
@@ -619,7 +627,7 @@ variant5 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (Codec arg4fns) (C
 
 {-| TODO
 -}
-endCustom : CustomCodec (a -> IR) () a -> Codec a a
+endCustom : CustomCodec (a -> IR) () a -> Codec a
 endCustom (CustomCodec prev) =
     Codec
         { fromInput = prev.match
@@ -641,8 +649,8 @@ endCustom (CustomCodec prev) =
 
 {-| TODO
 -}
-succeed : output -> Codec input output
-succeed ctor =
+record : output -> Transformer input output
+record ctor =
     Codec
         { fromInput = \_ -> Product []
         , toOutput =
@@ -659,12 +667,12 @@ succeed ctor =
 
 {-| TODO
 -}
-andMap :
+field :
     (input -> field)
-    -> Codec field field
-    -> Codec input (field -> output)
-    -> Codec input output
-andMap getter (Codec this) (Codec prev) =
+    -> Codec field
+    -> Transformer input (field -> output)
+    -> Transformer input output
+field getter (Codec this) (Codec prev) =
     Codec
         { fromInput =
             \a ->
@@ -696,10 +704,17 @@ andMap getter (Codec this) (Codec prev) =
 
 {-| TODO
 -}
+endRecord : Transformer a a -> Codec a
+endRecord (Codec prev) =
+    Codec prev
+
+
+{-| TODO
+-}
 map :
-    (output1 -> output2)
-    -> Codec input output1
-    -> Codec input output2
+    (a -> b)
+    -> Transformer input a
+    -> Transformer input b
 map f (Codec prev) =
     Codec
         { fromInput = prev.fromInput
@@ -711,9 +726,9 @@ map f (Codec prev) =
 {-| TODO
 -}
 contramap :
-    (input2 -> input1)
-    -> Codec input1 output
-    -> Codec input2 output
+    (b -> a)
+    -> Transformer a output
+    -> Transformer b output
 contramap f (Codec prev) =
     Codec
         { fromInput = f >> prev.fromInput
@@ -725,9 +740,9 @@ contramap f (Codec prev) =
 {-| TODO
 -}
 andThen :
-    (output1 -> Result Error output2)
-    -> Codec input output1
-    -> Codec input output2
+    (a -> Result Error b)
+    -> Transformer input a
+    -> Transformer input b
 andThen f (Codec prev) =
     Codec
         { fromInput = prev.fromInput
@@ -738,7 +753,7 @@ andThen f (Codec prev) =
 
 {-| TODO
 -}
-label : String -> Codec input output -> Codec input output
+label : String -> Codec a -> Codec a
 label label_ (Codec c) =
     Codec
         { fromInput = c.fromInput >> Labelled label_

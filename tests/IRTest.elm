@@ -20,7 +20,7 @@ irTests =
         ]
 
 
-roundTrip : IR.Codec input input -> String -> Test
+roundTrip : IR.Codec input -> String -> Test
 roundTrip codec name =
     fuzz (IR.Fuzz.fuzzerWithOverrides [ IR.Fuzz.override "hello world" IR.string (Fuzz.constant "hello world") ] codec) (name ++ " fromInput -> toOutput roundtrip") <|
         \rec ->

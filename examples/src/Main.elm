@@ -30,18 +30,19 @@ type Pet
     | Robot Char Int
 
 
-personCodec : IR.Codec Person Person
+personCodec : IR.Codec Person
 personCodec =
-    IR.succeed Person
-        |> IR.andMap .name
+    IR.record Person
+        |> IR.field .name
             (IR.string |> IR.label "name")
-        |> IR.andMap .heightInCentimetres
+        |> IR.field .heightInCentimetres
             (IR.float |> IR.label "heightInCentimetres")
-        |> IR.andMap .pets
+        |> IR.field .pets
             (IR.list petCodec)
+        |> IR.endRecord
 
 
-petCodec : IR.Codec Pet Pet
+petCodec : IR.Codec Pet
 petCodec =
     IR.custom
         (\dog robot variant ->
@@ -53,9 +54,10 @@ petCodec =
                     robot series model
         )
         |> IR.variant1 Dog
-            (IR.succeed (\name -> { name = name })
-                |> IR.andMap .name
+            (IR.record (\name -> { name = name })
+                |> IR.field .name
                     (IR.string |> IR.label "dogName")
+                |> IR.endRecord
             )
         |> IR.variant2 Robot
             (IR.char |> IR.label "series")

@@ -68,11 +68,12 @@ input__Readme_0 =
     { name = "Ed", age = 44 }
 
 
-codec__Readme_0 : IR.Codec User__Readme_0 User__Readme_0
+codec__Readme_0 : IR.Codec User__Readme_0
 codec__Readme_0 =
-    IR.succeed User__Readme_0
-        |> IR.andMap .name IR.string
-        |> IR.andMap .age IR.int
+    IR.record User__Readme_0
+        |> IR.field .name IR.string
+        |> IR.field .age IR.int
+        |> IR.endRecord
 
 
 ir__Readme_0 : IR.IR

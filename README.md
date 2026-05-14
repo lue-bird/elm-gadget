@@ -37,11 +37,12 @@ input =
 
 -- Just write an IR.Codec like this:
 
-codec : IR.Codec User User
+codec : IR.Codec User
 codec = 
-    IR.succeed User 
-        |> IR.andMap .name IR.string 
-        |> IR.andMap .age IR.int
+    IR.record User 
+        |> IR.field .name IR.string 
+        |> IR.field .age IR.int
+        |> IR.endRecord
 
 -- Now you can convert to and from IR like this:
 

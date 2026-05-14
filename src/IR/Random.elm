@@ -14,12 +14,12 @@ type Override
     = Override String (Random.Generator IR.IR)
 
 
-override : String -> IR.Codec a a -> Random.Generator a -> Override
+override : String -> IR.Codec a -> Random.Generator a -> Override
 override label codec inputFuzzer =
     Override label (Random.map (IR.fromInput codec) inputFuzzer)
 
 
-generatorWithOverrides : List Override -> IR.Codec input output -> Random.Generator output
+generatorWithOverrides : List Override -> IR.Codec a -> Random.Generator a
 generatorWithOverrides overrides codec =
     let
         overridesDict =
@@ -41,7 +41,7 @@ generatorWithOverrides overrides codec =
             )
 
 
-generator : IR.Codec input output -> Random.Generator output
+generator : IR.Codec a -> Random.Generator a
 generator codec =
     generatorWithOverrides [] codec
 

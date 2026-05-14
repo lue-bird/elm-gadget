@@ -13,15 +13,16 @@ type alias Record =
     }
 
 
-recordCodec : IR.Codec Record Record
+recordCodec : IR.Codec Record
 recordCodec =
-    IR.succeed Record
-        |> IR.andMap .bool IR.bool
-        |> IR.andMap .int IR.int
-        |> IR.andMap .float IR.float
-        |> IR.andMap .string IR.string
-        |> IR.andMap .char IR.char
-        |> IR.andMap .custom customCodec
+    IR.record Record
+        |> IR.field .bool IR.bool
+        |> IR.field .int IR.int
+        |> IR.field .float IR.float
+        |> IR.field .string IR.string
+        |> IR.field .char IR.char
+        |> IR.field .custom customCodec
+        |> IR.endRecord
 
 
 type Custom
@@ -33,7 +34,7 @@ type Custom
     | Var5 Bool Bool Bool Bool Bool
 
 
-customCodec : IR.Codec Custom Custom
+customCodec : IR.Codec Custom
 customCodec =
     IR.custom
         (\v0 v1 v2 v3 v4 v5 v ->

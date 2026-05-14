@@ -5,12 +5,12 @@ import Fuzz
 import IR
 
 
-fuzzer : IR.Codec input output -> Fuzz.Fuzzer output
+fuzzer : IR.Codec a -> Fuzz.Fuzzer a
 fuzzer codec =
     fuzzerWithOverrides [] codec
 
 
-fuzzerWithOverrides : List Override -> IR.Codec input output -> Fuzz.Fuzzer output
+fuzzerWithOverrides : List Override -> IR.Codec a -> Fuzz.Fuzzer a
 fuzzerWithOverrides overrides codec =
     let
         overridesDict =
@@ -35,7 +35,7 @@ type Override
     = Override String (Fuzz.Fuzzer IR.IR)
 
 
-override : String -> IR.Codec a a -> Fuzz.Fuzzer a -> Override
+override : String -> IR.Codec a -> Fuzz.Fuzzer a -> Override
 override label codec inputFuzzer =
     Override label (Fuzz.map (IR.fromInput codec) inputFuzzer)
 
