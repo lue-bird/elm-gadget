@@ -68,7 +68,7 @@ main =
 
         fuzzOverrides =
             [ IR.Fuzz.override "name" IR.string (Fuzz.oneOf (List.map Fuzz.constant [ "Ed", "Mario", "Leonardo", "Jeroen" ]))
-            , IR.Fuzz.override "heightInCentimetres" IR.float (Fuzz.floatRange 120 200)
+            , IR.Fuzz.override "heightInCentimetres" IR.float (Fuzz.floatRange 160 190)
             , IR.Fuzz.override "dogName" IR.string (Fuzz.oneOf (List.map Fuzz.constant [ "Fido", "Kevin", "Rover", "Fifi" ]))
             , IR.Fuzz.override "series" IR.char (Fuzz.oneOf (List.range 65 91 |> List.map Char.fromCode |> List.map Fuzz.constant))
             , IR.Fuzz.override "model" IR.int (Fuzz.oneOf (List.range 1 5 |> List.map (\n -> n * 1000) |> List.map Fuzz.constant))
@@ -82,7 +82,7 @@ main =
 
         randomOverrides =
             [ IR.Random.override "name" IR.string (Random.uniform "Ed" [ "Mario", "Leonardo", "Jeroen" ])
-            , IR.Random.override "heightInCentimetres" IR.float (Random.float 120 200)
+            , IR.Random.override "heightInCentimetres" IR.float (Random.float 160 190)
             , IR.Random.override "dogName" IR.string (Random.uniform "Fido" [ "Kevin", "Rover", "Fifi" ])
             , IR.Random.override "series" IR.char (Random.uniform 'A' (List.range 66 91 |> List.map Char.fromCode))
             , IR.Random.override "model" IR.int (Random.uniform 1000 (List.range 2 5 |> List.map (\n -> n * 1000)))
