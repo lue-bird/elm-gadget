@@ -3,6 +3,7 @@ module Main exposing (..)
 import Browser
 import Fuzz
 import Html
+import Html.Attributes
 import Html.Events
 import IR
 import IR.Diff
@@ -173,7 +174,7 @@ view ( seed1, seed2 ) =
         , head "Html viewer (second value)"
         , IR.Html.view codec secondValue
         , head "Printer (first value)"
-        , Html.code [] [ Html.text printed ]
+        , Html.code [ Html.Attributes.class "withoutSpaces" ] [ Html.text printed ]
         , head "Parser (first value)"
         , show parsed
         , head "JSON encoder (first value)"
