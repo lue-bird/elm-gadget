@@ -4,7 +4,7 @@ module IR exposing
     , IRType(..), VariantType(..), irType
     , bool, char, string, int, float
     , list, array, dict, set, maybe, result, tuple, triple
-    , Transformer, record, field, endRecord
+    , Transformer, record, field
     , CustomCodec, custom
     , variant0, variant1, variant2, variant3, variant4, variant5
     , endCustom
@@ -50,7 +50,7 @@ Convert between Elm data types and an intermediate representation (IR)
 
 ### Record types
 
-@docs Transformer, record, field, endRecord
+@docs Transformer, record, field
 
 
 ### Custom types
@@ -354,7 +354,6 @@ tuple a b =
     record Tuple.pair
         |> field Tuple.first a
         |> field Tuple.second b
-        |> endRecord
 
 
 {-| TODO
@@ -365,7 +364,6 @@ triple a b c =
         |> field (\( a_, _, _ ) -> a_) a
         |> field (\( _, b_, _ ) -> b_) b
         |> field (\( _, _, c_ ) -> c_) c
-        |> endRecord
 
 
 {-| TODO
@@ -700,13 +698,6 @@ field getter (Codec this) (Codec prev) =
                 _ ->
                     ProductType [ this.irType ]
         }
-
-
-{-| TODO
--}
-endRecord : Transformer a a -> Codec a
-endRecord (Codec prev) =
-    Codec prev
 
 
 {-| TODO
