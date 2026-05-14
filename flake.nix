@@ -19,6 +19,7 @@
       devShells.${system}.default = pkgs.mkShell {
         name = "devShell";
         packages = with pkgs; [
+          git
           xdg-utils
           nodejs
           elmPackages.elm
@@ -32,10 +33,14 @@
           DEVDIR="$PWD"
           echo -e "\n\033[1m*** Entering development shell for elm-ir ***\033[0m\n"
 
-          echo -e -n "Updating repos... "
-          (cd $DEVDIR && git pull --quiet &)
-          echo -e "Update complete!\n"
+          echo -n "Updating repos... "
+          if cd $DEVDIR && git pull --quiet; then
+            echo -e "Success!\n"
+          else
+            echo -e "Failed!\n"
+          fi
           
+          git config --local core.hooksPath .githooks/
 
           echo -e "\033[1;36mrun\033[0m: start the development environment"
 
