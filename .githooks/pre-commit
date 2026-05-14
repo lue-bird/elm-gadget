@@ -1,29 +1,29 @@
 #! /bin/bash
 
-printf "Running pre-commit hooks\n"
+printf "Running pre-commit hooks\n\n"
 
 printf "Generating docs.json..."
 
 if elm make --docs=docs.json > /dev/null 2>&1; then
-    printf "Success!"
+    printf "Success!\n\n"
 else 
-    printf "Failed!"
+    printf "Failed!\n\n"
     exit 1
 fi
 
 printf "Running elm-format..."
 
 if elm-format . --yes > /dev/null 2>&1; then
-    printf "Success!"
+    printf "Success!\n\n"
 else 
-    printf "Failed!"
+    printf "Failed!\n\n"
     exit 1
 fi
 
-printf "Staging changed files"
+printf "Staging changed files\n\n"
 
 git add .
 
-printf "Pre-commit hooks complete\n"
+printf "Pre-commit hooks complete\n\n"
 
 exit 0
