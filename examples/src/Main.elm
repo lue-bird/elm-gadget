@@ -138,9 +138,9 @@ main =
 
 head : String -> Html.Html msg
 head txt =
-    Html.h3 [] [ Html.text txt ]
+    Html.h2 [] [ Html.text txt ]
 
 
 show : a -> Html.Html msg
 show a =
-    Html.pre [] [ Html.text (Debug.toString a) ]
+    Html.code [] [ Html.text (Debug.toString a) ]
