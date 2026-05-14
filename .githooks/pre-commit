@@ -2,7 +2,7 @@
 
 printf "Running pre-commit hooks\n\n"
 
-printf "  1. Running elm-format..."
+printf "  1. Running elm-format... "
 
 if elm-format . --yes > /dev/null 2>&1; then
     printf "Success!\n\n"
@@ -11,7 +11,7 @@ else
     exit 1
 fi
 
-printf "  2. Generating docs.json..."
+printf "  2. Generating docs.json... "
 
 if elm make --docs=docs.json > /dev/null 2>&1; then
     printf "Success!\n\n"
