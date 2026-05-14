@@ -31,7 +31,7 @@ encodeAdapter irValue =
     case irValue of
         IR.Labelled label innerValue ->
             JE.object
-                [ ( "override"
+                [ ( "labelled"
                   , JE.object
                         [ ( "label", JE.string label )
                         , ( "value", encodeAdapter innerValue )
@@ -122,7 +122,7 @@ encodeAdapter irValue =
 decodeAdapter : JD.Decoder IR.IR
 decodeAdapter =
     JD.oneOf
-        [ JD.field "override"
+        [ JD.field "labelled"
             (JD.map2 (\label value -> IR.Labelled label value)
                 (JD.field "label" JD.string)
                 (JD.field "value" (JD.lazy (\() -> decodeAdapter)))
