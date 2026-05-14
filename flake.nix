@@ -40,7 +40,7 @@
             echo -e "Failed!\n"
           fi
           
-          git config --local core.hooksPath .githooks/
+          git config --local core.hooksPath "$DEVDIR/.githooks/"
 
           echo -e "\033[1;36mrun\033[0m: start the development environment"
 
