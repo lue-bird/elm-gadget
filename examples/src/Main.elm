@@ -30,9 +30,12 @@ type Pet
 personCodec : IR.Codec Person Person
 personCodec =
     IR.succeed Person
-        |> IR.andMap .name (IR.string |> IR.label "name")
-        |> IR.andMap .heightInCentimetres (IR.float |> IR.label "heightInCentimetres")
-        |> IR.andMap .pets (IR.list petCodec)
+        |> IR.andMap .name
+            (IR.string |> IR.label "name")
+        |> IR.andMap .heightInCentimetres
+            (IR.float |> IR.label "heightInCentimetres")
+        |> IR.andMap .pets
+            (IR.list petCodec)
 
 
 petCodec : IR.Codec Pet Pet
@@ -48,7 +51,8 @@ petCodec =
         )
         |> IR.variant1 Dog
             (IR.succeed (\name -> { name = name })
-                |> IR.andMap .name (IR.string |> IR.label "dogName")
+                |> IR.andMap .name
+                    (IR.string |> IR.label "dogName")
             )
         |> IR.variant2 Robot
             (IR.char |> IR.label "series")
