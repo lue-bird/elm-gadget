@@ -21,7 +21,7 @@ import IR
 import IR.Fuzz
 import IR.Json
 import Fuzz
-import Json.Decode
+import Json.Decode 
 
 -- For a data type like this:
 
