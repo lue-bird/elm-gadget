@@ -130,30 +130,60 @@ htmlAdapter irValue =
                             , arg4
                             , arg5
                             ]
+
+                numArgs =
+                    List.length args
             in
             combinator
                 "Custom"
                 ("variant #"
                     ++ String.fromInt selected
                     ++ " with "
-                    ++ count args
-                    ++ " arguments"
+                    ++ String.fromInt numArgs
+                    ++ " argument"
+                    ++ (if numArgs == 1 then
+                            ""
+
+                        else
+                            "s"
+                       )
                 )
                 args
 
         IR.Product fields ->
+            let
+                count =
+                    List.length fields
+            in
             combinator
                 "Product"
-                ("with " ++ count fields ++ " fields")
+                ("with "
+                    ++ String.fromInt count
+                    ++ " field"
+                    ++ (if count == 1 then
+                            ""
+
+                        else
+                            "s"
+                       )
+                )
                 fields
 
         IR.List items ->
+            let
+                count =
+                    List.length items
+            in
             combinator
                 "List"
-                ("with " ++ count items ++ " items")
+                ("with "
+                    ++ String.fromInt count
+                    ++ " item"
+                    ++ (if count == 1 then
+                            ""
+
+                        else
+                            "s"
+                       )
+                )
                 items
-
-
-count : List a -> String
-count =
-    String.fromInt << List.length
