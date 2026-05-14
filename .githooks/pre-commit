@@ -3,6 +3,7 @@
 echo "Generating docs.json..."
 
 if elm make --docs=docs.json; then
+    git add docs.json
     echo "Success!"
 else 
     echo "Failed!"
