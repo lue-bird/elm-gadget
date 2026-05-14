@@ -1,7 +1,9 @@
 module Main exposing (..)
 
+import Browser
 import Fuzz
 import Html
+import Html.Events
 import IR
 import IR.Diff
 import IR.Fuzz
@@ -60,11 +62,45 @@ petCodec =
         |> IR.endCustom
 
 
-main : Html.Html msg
+main : Program () ( Int, Int ) Msg
 main =
+    Browser.element
+        { view = view
+        , update = update
+        , init = init
+        , subscriptions = always Sub.none
+        }
+
+
+type Msg
+    = Clicked
+    | NewSeeds ( Int, Int )
+
+
+update msg model =
+    case msg of
+        Clicked ->
+            ( model
+            , Random.generate NewSeeds (Random.pair (Random.int 0 Random.maxInt) (Random.int 0 Random.maxInt))
+            )
+
+        NewSeeds newSeeds ->
+            ( newSeeds
+            , Cmd.none
+            )
+
+
+init _ =
+    ( ( 0, 1 )
+    , Cmd.none
+    )
+
+
+view : ( Int, Int ) -> Html.Html Msg
+view ( seed1, seed2 ) =
     let
         codec =
-            IR.list personCodec
+            personCodec
 
         fuzzOverrides =
             [ IR.Fuzz.override "name" IR.string (Fuzz.oneOf (List.map Fuzz.constant [ "Ed", "Mario", "Leonardo", "Jeroen" ]))
@@ -92,11 +128,11 @@ main =
             IR.Random.generatorWithOverrides randomOverrides codec
 
         firstValue =
-            Random.step randomGenerator (Random.initialSeed 0)
+            Random.step randomGenerator (Random.initialSeed seed1)
                 |> Tuple.first
 
         secondValue =
-            Random.step randomGenerator (Random.initialSeed 4)
+            Random.step randomGenerator (Random.initialSeed seed2)
                 |> Tuple.first
 
         diff =
@@ -119,6 +155,7 @@ main =
     in
     Html.div []
         [ Html.h1 [] [ Html.text "elm-ir examples" ]
+        , Html.button [ Html.Events.onClick Clicked ] [ Html.text "Click to regenerate!" ]
         , head "IR type"
         , show (IR.irType codec)
         , head "Random generator (first value)"
