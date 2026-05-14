@@ -64,7 +64,7 @@ main : Html.Html msg
 main =
     let
         codec =
-            personCodec
+            IR.list personCodec
 
         fuzzOverrides =
             [ IR.Fuzz.override "name" IR.string (Fuzz.oneOf (List.map Fuzz.constant [ "Ed", "Mario", "Leonardo", "Jeroen" ]))
@@ -136,7 +136,7 @@ main =
         , head "Html viewer (second value)"
         , IR.Html.view codec secondValue
         , head "Printer (first value)"
-        , Html.pre [] [ Html.text printed ]
+        , Html.code [] [ Html.text printed ]
         , head "Parser (first value)"
         , show parsed
         , head "JSON encoder (first value)"

@@ -3,7 +3,7 @@ module IR exposing
     , IR(..), Variant(..), fromInput, toOutput, Error
     , IRType(..), VariantType(..), irType
     , bool, char, string, int, float
-    , list, array, dict, maybe, result, tuple, triple
+    , list, array, dict, set, maybe, result, tuple, triple
     , succeed, andMap
     , CustomCodec, custom
     , variant0, variant1, variant2, variant3, variant4, variant5
@@ -45,7 +45,7 @@ Convert between Elm data types and an intermediate representation (IR)
 
 ### Common data types
 
-@docs list, array, dict, maybe, result, tuple, triple
+@docs list, array, dict, set, maybe, result, tuple, triple
 
 
 ### Record types
@@ -74,6 +74,7 @@ Convert between Elm data types and an intermediate representation (IR)
 import Array
 import Dict
 import Result.Extra
+import Set
 
 
 {-| TODO
@@ -282,6 +283,17 @@ dict key value =
     list (tuple key value)
         |> contramap Dict.toList
         |> map Dict.fromList
+
+
+{-| TODO
+-}
+set :
+    Codec comparable comparable
+    -> Codec (Set.Set comparable) (Set.Set comparable)
+set value =
+    list value
+        |> contramap Set.toList
+        |> map Set.fromList
 
 
 {-| TODO
