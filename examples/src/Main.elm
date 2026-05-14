@@ -50,7 +50,9 @@ petCodec =
             (IR.succeed (\name -> { name = name })
                 |> IR.andMap .name (IR.string |> IR.label "dogName")
             )
-        |> IR.variant2 Robot (IR.char |> IR.label "series") (IR.int |> IR.label "model")
+        |> IR.variant2 Robot
+            (IR.char |> IR.label "series")
+            (IR.int |> IR.label "model")
         |> IR.endCustom
 
 
