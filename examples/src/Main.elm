@@ -15,42 +15,42 @@ import Parser
 import Random
 
 
-type Example
-    = Yellow
-    | Green String Record
-    | Red Char (List Bool)
-
-
-type alias Record =
+type alias Person =
     { name : String
-    , number : Int
+    , heightInCentimetres : Float
+    , pets : List Pet
     }
 
 
-recordCodec : IR.Codec Record Record
-recordCodec =
-    IR.succeed Record
+type Pet
+    = Dog { name : String }
+    | Robot Char Int
+
+
+personCodec : IR.Codec Person Person
+personCodec =
+    IR.succeed Person
         |> IR.andMap .name (IR.string |> IR.label "name")
-        |> IR.andMap .number (IR.int |> IR.label "number")
+        |> IR.andMap .heightInCentimetres (IR.float |> IR.label "heightInCentimetres")
+        |> IR.andMap .pets (IR.list petCodec)
 
 
-exampleCodec : IR.Codec Example Example
-exampleCodec =
+petCodec : IR.Codec Pet Pet
+petCodec =
     IR.custom
-        (\red yellow green value ->
-            case value of
-                Red c l ->
-                    red c l
+        (\dog robot variant ->
+            case variant of
+                Dog rec ->
+                    dog rec
 
-                Yellow ->
-                    yellow
-
-                Green s r ->
-                    green s r
+                Robot series model ->
+                    robot series model
         )
-        |> IR.variant2 Red IR.char (IR.list IR.bool)
-        |> IR.variant0 Yellow
-        |> IR.variant2 Green IR.string recordCodec
+        |> IR.variant1 Dog
+            (IR.succeed (\name -> { name = name })
+                |> IR.andMap .name (IR.string |> IR.label "dogName")
+            )
+        |> IR.variant2 Robot (IR.char |> IR.label "series") (IR.int |> IR.label "model")
         |> IR.endCustom
 
 
@@ -58,11 +58,14 @@ main : Html.Html msg
 main =
     let
         codec =
-            exampleCodec
+            personCodec
 
         fuzzOverrides =
             [ IR.Fuzz.override "name" IR.string (Fuzz.oneOf (List.map Fuzz.constant [ "Ed", "Mario", "Leonardo", "Jeroen" ]))
-            , IR.Fuzz.override "number" IR.int (Fuzz.constant 500)
+            , IR.Fuzz.override "heightInCentimetres" IR.float (Fuzz.floatRange 120 200)
+            , IR.Fuzz.override "dogName" IR.string (Fuzz.oneOf (List.map Fuzz.constant [ "Fido", "Kevin", "Rover", "Fifi" ]))
+            , IR.Fuzz.override "series" IR.char (Fuzz.oneOf (List.range 65 91 |> List.map Char.fromCode |> List.map Fuzz.constant))
+            , IR.Fuzz.override "model" IR.int (Fuzz.oneOf (List.range 1 5 |> List.map (\n -> n * 1000) |> List.map Fuzz.constant))
             ]
 
         fuzzer =
@@ -73,7 +76,10 @@ main =
 
         randomOverrides =
             [ IR.Random.override "name" IR.string (Random.uniform "Ed" [ "Mario", "Leonardo", "Jeroen" ])
-            , IR.Random.override "number" IR.int (Random.constant 1000)
+            , IR.Random.override "heightInCentimetres" IR.float (Random.float 120 200)
+            , IR.Random.override "dogName" IR.string (Random.uniform "Fido" [ "Kevin", "Rover", "Fifi" ])
+            , IR.Random.override "series" IR.char (Random.uniform 'A' (List.range 66 91 |> List.map Char.fromCode))
+            , IR.Random.override "model" IR.int (Random.uniform 1000 (List.range 2 5 |> List.map (\n -> n * 1000)))
             ]
 
         randomGenerator =
