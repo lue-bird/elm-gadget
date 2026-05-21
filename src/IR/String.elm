@@ -2,6 +2,7 @@ module IR.String exposing (parser, print)
 
 import IR.Adapter as IR
 import Parser as P exposing ((|.), (|=), Parser)
+import Set
 
 
 print : IR.Codec a -> a -> String
@@ -27,8 +28,8 @@ combinator label meta items =
 printAdapter : IR.IR -> String
 printAdapter irValue =
     case irValue of
-        IR.Labelled label inner ->
-            "x" ++ quoteString label ++ printAdapter inner
+        IR.Labelled labels inner ->
+            "x[" ++ (Set.map quoteString labels |> Set.toList |> String.concat) ++ "]" ++ printAdapter inner
 
         IR.Bool b ->
             primitive "b"
@@ -228,8 +229,8 @@ boolParser =
 charParser : Parser IR.IR
 charParser =
     (P.succeed identity
-        |. P.token "c("
-        |= P.loop "" stringParserHelp
+        |. P.token "c"
+        |= rawStringParser
     )
         |> P.andThen
             (\str ->
@@ -343,8 +344,17 @@ floatParserHelp =
 labelledParser : Parser IR.IR
 labelledParser =
     P.succeed IR.Labelled
-        |. P.token "x("
-        |= P.loop "" stringParserHelp
+        |. P.token "x"
+        |= (P.sequence
+                { start = "["
+                , end = "]"
+                , item = rawStringParser
+                , separator = ""
+                , spaces = P.spaces
+                , trailing = P.Forbidden
+                }
+                |> P.map Set.fromList
+           )
         |= P.lazy (\() -> irParser)
 
 
@@ -356,27 +366,34 @@ looping. Fixed version is here.
 stringParser : Parser IR.IR
 stringParser =
     P.succeed IR.String
-        |. P.token "s("
-        |= P.loop "" stringParserHelp
+        |. P.token "s"
+        |= rawStringParser
 
 
-stringParserHelp : String -> Parser (P.Step String String)
-stringParserHelp string =
-    P.oneOf
-        [ P.token (String.fromList [ '/', ')' ])
-            |> P.map (\_ -> string ++ String.fromChar ')' |> P.Loop)
-        , P.token (String.fromList [ '/', '/' ])
-            |> P.map (\_ -> string ++ String.fromChar '/' |> P.Loop)
-        , P.chompIf ((==) ')')
-            |> P.map (\_ -> P.Done string)
-        , P.chompIf ((==) '/')
-            |> P.map (\_ -> string ++ String.fromChar '/' |> P.Loop)
-        , P.succeed ()
-            |. P.chompIf (\c -> c /= ')' && c /= '/')
-            |. P.chompWhile (\c -> c /= ')' && c /= '/')
-            |> P.getChompedString
-            |> P.map (\s -> string ++ s |> P.Loop)
-        ]
+rawStringParser : Parser String
+rawStringParser =
+    P.loop "" rawStringParserHelp
+
+
+rawStringParserHelp : String -> Parser (P.Step String String)
+rawStringParserHelp string =
+    P.succeed identity
+        |. P.chompIf (\c -> c == '(')
+        |= P.oneOf
+            [ P.token "/)"
+                |> P.map (\_ -> string ++ ")" |> P.Loop)
+            , P.token "//"
+                |> P.map (\_ -> string ++ "/" |> P.Loop)
+            , P.chompIf ((==) ')')
+                |> P.map (\_ -> P.Done string)
+            , P.chompIf ((==) '/')
+                |> P.map (\_ -> string ++ "/" |> P.Loop)
+            , P.succeed ()
+                |. P.chompIf (\c -> c /= ')' && c /= '/')
+                |. P.chompWhile (\c -> c /= ')' && c /= '/')
+                |> P.getChompedString
+                |> P.map (\s -> string ++ s |> P.Loop)
+            ]
 
 
 quoteString : String -> String

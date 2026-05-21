@@ -3,6 +3,7 @@ module IR.Json exposing (..)
 import IR.Adapter as IR
 import Json.Decode as JD
 import Json.Encode as JE
+import Set
 
 
 encode : IR.Codec a -> a -> JE.Value
@@ -29,11 +30,11 @@ decoder codec =
 encodeAdapter : IR.IR -> JE.Value
 encodeAdapter irValue =
     case irValue of
-        IR.Labelled label innerValue ->
+        IR.Labelled labels innerValue ->
             JE.object
                 [ ( "labelled"
                   , JE.object
-                        [ ( "label", JE.string label )
+                        [ ( "labels", JE.set JE.string labels )
                         , ( "value", encodeAdapter innerValue )
                         ]
                   )
@@ -123,8 +124,8 @@ decodeAdapter : JD.Decoder IR.IR
 decodeAdapter =
     JD.oneOf
         [ JD.field "labelled"
-            (JD.map2 (\label value -> IR.Labelled label value)
-                (JD.field "label" JD.string)
+            (JD.map2 (\labels value -> IR.Labelled (Set.fromList labels) value)
+                (JD.field "labels" (JD.list JD.string))
                 (JD.field "value" (JD.lazy (\() -> decodeAdapter)))
             )
         , JD.field "bool" JD.bool |> JD.map IR.Bool

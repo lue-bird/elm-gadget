@@ -6,7 +6,6 @@ import Html
 import Html.Attributes
 import Html.Events
 import IR
-import IR.Adapter
 import IR.Diff
 import IR.Fuzz
 import IR.Html
@@ -160,8 +159,6 @@ view ( seed1, seed2 ) =
     Html.div []
         [ Html.h1 [] [ Html.text "elm-ir examples" ]
         , Html.button [ Html.Events.onClick Clicked ] [ Html.text "Click to regenerate!" ]
-        , head "IR type"
-        , show (IR.Adapter.irType codec)
         , head "Random generator (first value)"
         , show firstValue
         , head "Random generator (second value)"

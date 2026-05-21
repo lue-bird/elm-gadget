@@ -3,6 +3,7 @@ module IR.Fuzz exposing (Override, fuzzer, fuzzerWithOverrides, override)
 import Dict
 import Fuzz
 import IR.Adapter as IR
+import Set
 
 
 fuzzer : IR.Codec a -> Fuzz.Fuzzer a
@@ -43,14 +44,20 @@ override label codec inputFuzzer =
 fuzzAdapter : Dict.Dict String (Fuzz.Fuzzer IR.IR) -> IR.IRType -> Fuzz.Fuzzer IR.IR
 fuzzAdapter overrides irType =
     case irType of
-        IR.LabelledType label innerType ->
-            Fuzz.map (IR.Labelled label)
-                (case Dict.get label overrides of
-                    Just override_ ->
-                        override_
+        IR.LabelledType labels innerType ->
+            Fuzz.map (IR.Labelled labels)
+                (Set.foldl
+                    (\label maybe ->
+                        case maybe of
+                            Nothing ->
+                                Dict.get label overrides
 
-                    Nothing ->
-                        fuzzAdapter overrides innerType
+                            _ ->
+                                maybe
+                    )
+                    Nothing
+                    labels
+                    |> Maybe.withDefault (fuzzAdapter overrides innerType)
                 )
 
         IR.BoolType ->

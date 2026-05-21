@@ -13,6 +13,8 @@ module IR.Adapter exposing
 {-| TODO
 -}
 
+import Set
+
 
 type alias Error =
     String
@@ -39,7 +41,7 @@ type IR
     | Custom Int Variant
     | Product (List IR)
     | List (List IR)
-    | Labelled String IR
+    | Labelled (Set.Set String) IR
 
 
 {-| TODO
@@ -64,7 +66,7 @@ type IRType
     | CustomType VariantType (List VariantType)
     | ProductType (List IRType)
     | ListType IRType
-    | LabelledType String IRType
+    | LabelledType (Set.Set String) IRType
 
 
 {-| TODO

@@ -645,7 +645,14 @@ map aToB bToA (Codec prev) =
 label : String -> Codec a -> Codec a
 label label_ (Codec c) =
     Codec
-        { fromInput = c.fromInput >> Labelled label_
+        { fromInput =
+            \input ->
+                case c.fromInput input of
+                    Labelled labels inner ->
+                        Labelled (Set.insert label_ labels) inner
+
+                    other ->
+                        Labelled (Set.singleton label_) other
         , toOutput =
             \ir ->
                 case ir of
@@ -654,5 +661,11 @@ label label_ (Codec c) =
 
                     _ ->
                         Err "override toOutput failed"
-        , irType = LabelledType label_ c.irType
+        , irType =
+            case c.irType of
+                LabelledType labels inner ->
+                    LabelledType (Set.insert label_ labels) inner
+
+                other ->
+                    LabelledType (Set.singleton label_) other
         }

@@ -3,6 +3,7 @@ module IR.Html exposing (..)
 import Html as H
 import Html.Attributes as HA
 import IR.Adapter as IR
+import Set
 
 
 view : IR.Codec a -> a -> H.Html msg
@@ -71,8 +72,8 @@ combinator typeName meta items =
 htmlAdapter : IR.IR -> H.Html msg
 htmlAdapter irValue =
     case irValue of
-        IR.Labelled label inner ->
-            labelled label (htmlAdapter inner)
+        IR.Labelled labels inner ->
+            labelled (Set.toList labels |> String.join ", ") (htmlAdapter inner)
 
         IR.Bool b ->
             unquotedPrimitive "Bool"

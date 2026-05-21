@@ -8,6 +8,7 @@ import Random.Extra
 import Random.Float
 import Random.Int
 import Random.String
+import Set
 
 
 type Override
@@ -49,14 +50,21 @@ generator codec =
 randomAdapter : Dict.Dict String (Random.Generator IR.IR) -> IR.IRType -> Random.Generator IR.IR
 randomAdapter overrides irType =
     case irType of
-        IR.LabelledType label innerType ->
-            Random.map (IR.Labelled label) <|
-                case Dict.get label overrides of
-                    Just override_ ->
-                        override_
+        IR.LabelledType labels innerType ->
+            Random.map (IR.Labelled labels) <|
+                (Set.foldl
+                    (\label maybe ->
+                        case maybe of
+                            Nothing ->
+                                Dict.get label overrides
 
-                    Nothing ->
-                        randomAdapter overrides innerType
+                            _ ->
+                                maybe
+                    )
+                    Nothing
+                    labels
+                    |> Maybe.withDefault (randomAdapter overrides innerType)
+                )
 
         IR.BoolType ->
             Random.uniform False [ True ] |> Random.map IR.Bool
