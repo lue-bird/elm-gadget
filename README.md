@@ -18,6 +18,7 @@ Do `npx run-pty run-pty.json` in the project root folder.
 
 ```elm
 import IR
+import IR.Adapter
 import IR.Fuzz
 import IR.Json
 import Fuzz
@@ -47,12 +48,12 @@ codec =
 
 ir : IR.IR
 ir = 
-    IR.fromInput codec input
+    IR.Adapter.fromInput codec input
 
-ir --> IR.Product [ IR.Int 44, IR.String "Ed" ]
+ir --> IR.Adapter.Product [ IR.Adapter.Int 44, IR.Adapter.String "Ed" ]
 
 output = 
-    IR.toOutput codec ir
+    IR.Adapter.toOutput codec ir
 
 output --> Ok input
 

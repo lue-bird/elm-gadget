@@ -1,6 +1,6 @@
 module IR.String exposing (parser, print)
 
-import IR
+import IR.Adapter as IR
 import Parser as P exposing ((|.), (|=), Parser)
 
 

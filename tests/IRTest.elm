@@ -3,6 +3,7 @@ module IRTest exposing (..)
 import Expect
 import Fuzz
 import IR
+import IR.Adapter
 import IR.Fuzz
 import Test exposing (..)
 import TestHelpers exposing (..)
@@ -25,6 +26,6 @@ roundTrip codec name =
     fuzz (IR.Fuzz.fuzzerWithOverrides [ IR.Fuzz.override "hello world" IR.string (Fuzz.constant "hello world") ] codec) (name ++ " fromInput -> toOutput roundtrip") <|
         \rec ->
             rec
-                |> IR.fromInput codec
-                |> IR.toOutput codec
+                |> IR.Adapter.fromInput codec
+                |> IR.Adapter.toOutput codec
                 |> Expect.equal (Ok rec)

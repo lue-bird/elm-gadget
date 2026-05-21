@@ -2,7 +2,7 @@ module IR.Html exposing (..)
 
 import Html as H
 import Html.Attributes as HA
-import IR
+import IR.Adapter as IR
 
 
 view : IR.Codec a -> a -> H.Html msg

@@ -2,7 +2,7 @@ module IR.Diff exposing (..)
 
 import Dict
 import Diff as ListDiffer
-import IR
+import IR.Adapter as IR
 import List.Extra
 import Maybe.Extra
 import Result.Extra

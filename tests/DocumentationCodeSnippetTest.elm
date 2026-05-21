@@ -6,6 +6,7 @@ module DocumentationCodeSnippetTest exposing (tests)
 import Expect
 import Fuzz
 import IR
+import IR.Adapter
 import IR.Fuzz
 import IR.Json
 import Json.Decode
@@ -25,7 +26,11 @@ tests =
                     (\() ->
                         ir__Readme_0
                             |> Expect.equal
-                                (IR.Product [ IR.Int 44, IR.String "Ed" ])
+                                (IR.Adapter.Product
+                                    [ IR.Adapter.Int 44
+                                    , IR.Adapter.String "Ed"
+                                    ]
+                                )
                     )
                 , Test.test
                     "1"
@@ -75,11 +80,11 @@ codec__Readme_0 =
 
 ir__Readme_0 : IR.IR
 ir__Readme_0 =
-    IR.fromInput codec__Readme_0 input__Readme_0
+    IR.Adapter.fromInput codec__Readme_0 input__Readme_0
 
 
 output__Readme_0 =
-    IR.toOutput codec__Readme_0 ir__Readme_0
+    IR.Adapter.toOutput codec__Readme_0 ir__Readme_0
 
 
 json__Readme_0 =
