@@ -42,7 +42,6 @@ codec =
     IR.record User 
         |> IR.field .name IR.string 
         |> IR.field .age IR.int
-        |> IR.endRecord
 
 -- Now you can convert to and from IR like this:
 

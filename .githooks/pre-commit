@@ -1,5 +1,3 @@
-#! /bin/bash
-
 printf "Running pre-commit hooks\n\n"
 
 printf "  1. Running elm-format... "

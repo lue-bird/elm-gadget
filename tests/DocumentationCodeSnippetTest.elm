@@ -70,10 +70,7 @@ input__Readme_0 =
 
 codec__Readme_0 : IR.Codec User__Readme_0
 codec__Readme_0 =
-    IR.record User__Readme_0
-        |> IR.field .name IR.string
-        |> IR.field .age IR.int
-        |> IR.endRecord
+    IR.record User__Readme_0 |> IR.field .name IR.string |> IR.field .age IR.int
 
 
 ir__Readme_0 : IR.IR

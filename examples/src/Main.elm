@@ -39,7 +39,6 @@ personCodec =
             (IR.float |> IR.label "heightInCentimetres")
         |> IR.field .pets
             (IR.list petCodec)
-        |> IR.endRecord
 
 
 petCodec : IR.Codec Pet
@@ -57,7 +56,6 @@ petCodec =
             (IR.record (\name -> { name = name })
                 |> IR.field .name
                     (IR.string |> IR.label "dogName")
-                |> IR.endRecord
             )
         |> IR.variant2 Robot
             (IR.char |> IR.label "series")

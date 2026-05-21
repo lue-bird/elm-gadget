@@ -22,7 +22,6 @@ recordCodec =
         |> IR.field .string IR.string
         |> IR.field .char IR.char
         |> IR.field .custom customCodec
-        |> IR.endRecord
 
 
 type Custom
