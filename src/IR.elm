@@ -1,15 +1,14 @@
 module IR exposing
     ( Codec
-    , IR
     , bool, char, string, int, float
     , list, array, dict, set
-    , maybe, result
     , tuple, triple
-    , Transformer, record, field
-    , CustomCodec, custom
+    , RecordCodecBuilder, record, field, endRecord
+    , maybe, result
+    , CustomCodecBuilder, custom
     , variant0, variant1, variant2, variant3, variant4, variant5
     , endCustom
-    , map, contramap, andThen
+    , map
     , label
     )
 
@@ -24,11 +23,6 @@ Convert between Elm data types and an intermediate representation (IR)
 ## IR codecs
 
 @docs Codec
-
-
-## IR values
-
-@docs IR
 
 
 ## IR primitives
@@ -47,31 +41,23 @@ Convert between Elm data types and an intermediate representation (IR)
 @docs list, array, dict, set
 
 
-#### Sum types
-
-@docs maybe, result
-
-
-#### Product types
+### Product types
 
 @docs tuple, triple
-
-
-### Record types
-
-@docs Transformer, record, field
+@docs RecordCodecBuilder, record, field, endRecord
 
 
 ### Custom types
 
-@docs CustomCodec, custom
+@docs maybe, result
+@docs CustomCodecBuilder, custom
 @docs variant0, variant1, variant2, variant3, variant4, variant5
 @docs endCustom
 
 
 ### Transforming codec input and output
 
-@docs map, contramap, andThen
+@docs map
 
 
 ### Labelling codecs
@@ -82,7 +68,7 @@ Convert between Elm data types and an intermediate representation (IR)
 
 import Array
 import Dict
-import IR.Adapter exposing (Error, IR(..), IRType(..), Transformer(..), Variant(..), VariantType(..))
+import IR.Adapter exposing (Codec(..), Error, IR(..), IRType(..), Variant(..), VariantType(..))
 import Result.Extra
 import Set
 
@@ -95,14 +81,23 @@ type alias Codec a =
 
 {-| TODO
 -}
-type alias Transformer input output =
-    IR.Adapter.Transformer input output
+type RecordCodecBuilder input output
+    = RecordCodecBuilder
+        { fromInput : input -> IR
+        , toOutput : IR -> Result Error output
+        , irType : IRType
+        }
 
 
 {-| TODO
 -}
-type alias IR =
-    IR.Adapter.IR
+type CustomCodecBuilder input hasAtLeastOneVariant output
+    = CustomCodec
+        { match : input
+        , fromIR : IR -> Result Error output
+        , variantTypes : List VariantType
+        , index : Int
+        }
 
 
 {-| TODO
@@ -222,8 +217,7 @@ dict :
     -> Codec (Dict.Dict comparable v)
 dict key value =
     list (tuple key value)
-        |> contramap Dict.toList
-        |> map Dict.fromList
+        |> map Dict.fromList Dict.toList
 
 
 {-| TODO
@@ -233,8 +227,7 @@ set :
     -> Codec (Set.Set comparable)
 set value =
     list value
-        |> contramap Set.toList
-        |> map Set.fromList
+        |> map Set.fromList Set.toList
 
 
 {-| TODO
@@ -242,8 +235,7 @@ set value =
 array : Codec a -> Codec (Array.Array a)
 array item =
     list item
-        |> contramap Array.toList
-        |> map Array.fromList
+        |> map Array.fromList Array.toList
 
 
 {-| TODO
@@ -289,6 +281,7 @@ tuple a b =
     record Tuple.pair
         |> field Tuple.first a
         |> field Tuple.second b
+        |> endRecord
 
 
 {-| TODO
@@ -299,22 +292,12 @@ triple a b c =
         |> field (\( a_, _, _ ) -> a_) a
         |> field (\( _, b_, _ ) -> b_) b
         |> field (\( _, _, c_ ) -> c_) c
+        |> endRecord
 
 
 {-| TODO
 -}
-type CustomCodec input hasAtLeastOneVariant output
-    = CustomCodec
-        { match : input
-        , fromIR : IR -> Result Error output
-        , variantTypes : List VariantType
-        , index : Int
-        }
-
-
-{-| TODO
--}
-custom : input -> CustomCodec input Never output
+custom : input -> CustomCodecBuilder input Never output
 custom match =
     CustomCodec
         { match = match
@@ -328,8 +311,8 @@ custom match =
 -}
 variant0 :
     output
-    -> CustomCodec (IR -> input) variantType output
-    -> CustomCodec input () output
+    -> CustomCodecBuilder (IR -> input) variantType output
+    -> CustomCodecBuilder input () output
 variant0 ctor (CustomCodec prev) =
     CustomCodec
         { match = prev.match <| Custom prev.index Variant0
@@ -357,8 +340,8 @@ variant0 ctor (CustomCodec prev) =
 variant1 :
     (arg1 -> output)
     -> Codec arg1
-    -> CustomCodec ((arg1 -> IR) -> input) variantType output
-    -> CustomCodec input () output
+    -> CustomCodecBuilder ((arg1 -> IR) -> input) variantType output
+    -> CustomCodecBuilder input () output
 variant1 ctor (Codec argfns) (CustomCodec prev) =
     CustomCodec
         { match = prev.match <| \arg -> Custom prev.index (Variant1 (argfns.fromInput arg))
@@ -387,8 +370,8 @@ variant2 :
     (arg1 -> arg2 -> output)
     -> Codec arg1
     -> Codec arg2
-    -> CustomCodec ((arg1 -> arg2 -> IR) -> input) variantType output
-    -> CustomCodec input () output
+    -> CustomCodecBuilder ((arg1 -> arg2 -> IR) -> input) variantType output
+    -> CustomCodecBuilder input () output
 variant2 ctor (Codec arg1fns) (Codec arg2fns) (CustomCodec prev) =
     CustomCodec
         { match = prev.match <| \arg1 arg2 -> Custom prev.index (Variant2 (arg1fns.fromInput arg1) (arg2fns.fromInput arg2))
@@ -418,8 +401,8 @@ variant3 :
     -> Codec arg1
     -> Codec arg2
     -> Codec arg3
-    -> CustomCodec ((arg1 -> arg2 -> arg3 -> IR) -> input) variantType output
-    -> CustomCodec input () output
+    -> CustomCodecBuilder ((arg1 -> arg2 -> arg3 -> IR) -> input) variantType output
+    -> CustomCodecBuilder input () output
 variant3 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (CustomCodec prev) =
     CustomCodec
         { match =
@@ -464,8 +447,8 @@ variant4 :
     -> Codec arg2
     -> Codec arg3
     -> Codec arg4
-    -> CustomCodec ((arg1 -> arg2 -> arg3 -> arg4 -> IR) -> input) variantType output
-    -> CustomCodec input () output
+    -> CustomCodecBuilder ((arg1 -> arg2 -> arg3 -> arg4 -> IR) -> input) variantType output
+    -> CustomCodecBuilder input () output
 variant4 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (Codec arg4fns) (CustomCodec prev) =
     CustomCodec
         { match =
@@ -514,8 +497,8 @@ variant5 :
     -> Codec arg3
     -> Codec arg4
     -> Codec arg5
-    -> CustomCodec ((arg1 -> arg2 -> arg3 -> arg4 -> arg5 -> IR) -> input) variantType output
-    -> CustomCodec input () output
+    -> CustomCodecBuilder ((arg1 -> arg2 -> arg3 -> arg4 -> arg5 -> IR) -> input) variantType output
+    -> CustomCodecBuilder input () output
 variant5 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (Codec arg4fns) (Codec arg5fns) (CustomCodec prev) =
     CustomCodec
         { match =
@@ -560,7 +543,7 @@ variant5 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (Codec arg4fns) (C
 
 {-| TODO
 -}
-endCustom : CustomCodec (a -> IR) () a -> Codec a
+endCustom : CustomCodecBuilder (a -> IR) () a -> Codec a
 endCustom (CustomCodec prev) =
     Codec
         { fromInput = prev.match
@@ -582,9 +565,9 @@ endCustom (CustomCodec prev) =
 
 {-| TODO
 -}
-record : output -> Transformer input output
+record : output -> RecordCodecBuilder input output
 record ctor =
-    Codec
+    RecordCodecBuilder
         { fromInput = \_ -> Product []
         , toOutput =
             \ir ->
@@ -603,76 +586,56 @@ record ctor =
 field :
     (input -> field)
     -> Codec field
-    -> Transformer input (field -> output)
-    -> Transformer input output
-field getter (Codec this) (Codec prev) =
-    Codec
+    -> RecordCodecBuilder input (field -> output)
+    -> RecordCodecBuilder input output
+field getter (Codec codec) (RecordCodecBuilder builder) =
+    RecordCodecBuilder
         { fromInput =
             \a ->
-                case prev.fromInput a of
+                case builder.fromInput a of
                     Product prevFields ->
-                        Product (this.fromInput (getter a) :: prevFields)
+                        Product (codec.fromInput (getter a) :: prevFields)
 
                     _ ->
-                        Product [ this.fromInput (getter a) ]
+                        Product [ codec.fromInput (getter a) ]
         , toOutput =
             \ir ->
                 case ir of
                     Product (thisField :: prevFields) ->
                         Result.map2 (\ctor val -> ctor val)
-                            (prev.toOutput (Product prevFields))
-                            (this.toOutput thisField)
+                            (builder.toOutput (Product prevFields))
+                            (codec.toOutput thisField)
 
                     _ ->
                         Err "andMap toOutput failed"
         , irType =
-            case prev.irType of
+            case builder.irType of
                 ProductType prevFieldTypes ->
-                    ProductType (this.irType :: prevFieldTypes)
+                    ProductType (codec.irType :: prevFieldTypes)
 
                 _ ->
-                    ProductType [ this.irType ]
+                    ProductType [ codec.irType ]
         }
+
+
+{-| TODO
+-}
+endRecord : RecordCodecBuilder a a -> Codec a
+endRecord (RecordCodecBuilder builder) =
+    Codec builder
 
 
 {-| TODO
 -}
 map :
     (a -> b)
-    -> Transformer input a
-    -> Transformer input b
-map f (Codec prev) =
+    -> (b -> a)
+    -> Codec a
+    -> Codec b
+map aToB bToA (Codec prev) =
     Codec
-        { fromInput = prev.fromInput
-        , toOutput = prev.toOutput >> Result.map f
-        , irType = prev.irType
-        }
-
-
-{-| TODO
--}
-contramap :
-    (b -> a)
-    -> Transformer a output
-    -> Transformer b output
-contramap f (Codec prev) =
-    Codec
-        { fromInput = f >> prev.fromInput
-        , toOutput = prev.toOutput
-        , irType = prev.irType
-        }
-
-
-{-| TODO
--}
-andThen :
-    (a -> Result Error b)
-    -> Transformer input a
-    -> Transformer input b
-andThen f (Codec prev) =
-    Codec
-        { fromInput = prev.fromInput
-        , toOutput = prev.toOutput >> Result.andThen f
+        { fromInput = bToA >> prev.fromInput
+        , toOutput = prev.toOutput >> Result.map aToB
         , irType = prev.irType
         }
 
@@ -689,7 +652,7 @@ label label_ (Codec c) =
                     Labelled _ innerIR ->
                         c.toOutput innerIR
 
-                    other ->
-                        Err ("override toOutput failed " ++ Debug.toString other)
+                    _ ->
+                        Err "override toOutput failed"
         , irType = LabelledType label_ c.irType
         }

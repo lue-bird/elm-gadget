@@ -18,7 +18,6 @@ Do `npx run-pty run-pty.json` in the project root folder.
 
 ```elm
 import IR
-import IR.Adapter
 import IR.Fuzz
 import IR.Json
 import Fuzz
@@ -43,19 +42,7 @@ codec =
     IR.record User 
         |> IR.field .name IR.string 
         |> IR.field .age IR.int
-
--- Now you can convert to and from IR like this:
-
-ir : IR.IR
-ir = 
-    IR.Adapter.fromInput codec input
-
-ir --> IR.Adapter.Product [ IR.Adapter.Int 44, IR.Adapter.String "Ed" ]
-
-output = 
-    IR.Adapter.toOutput codec ir
-
-output --> Ok input
+        |> IR.endRecord
 
 -- Now we just need to write a JSON encoder and 
 -- decoder for our IR type, and we'll be able to 

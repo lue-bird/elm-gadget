@@ -6,7 +6,6 @@ module DocumentationCodeSnippetTest exposing (tests)
 import Expect
 import Fuzz
 import IR
-import IR.Adapter
 import IR.Fuzz
 import IR.Json
 import Json.Decode
@@ -24,23 +23,6 @@ tests =
                 [ Test.test
                     "0"
                     (\() ->
-                        ir__Readme_0
-                            |> Expect.equal
-                                (IR.Adapter.Product
-                                    [ IR.Adapter.Int 44
-                                    , IR.Adapter.String "Ed"
-                                    ]
-                                )
-                    )
-                , Test.test
-                    "1"
-                    (\() ->
-                        output__Readme_0
-                            |> Expect.equal (Result.Ok input__Readme_0)
-                    )
-                , Test.test
-                    "2"
-                    (\() ->
                         let
                             unused : Json.Decode.Value
                             unused =
@@ -49,13 +31,13 @@ tests =
                         Expect.pass
                     )
                 , Test.test
-                    "3"
+                    "1"
                     (\() ->
                         decoded__Readme_0
                             |> Expect.equal (Result.Ok input__Readme_0)
                     )
                 , Test.test
-                    "4"
+                    "2"
                     (\() ->
                         fuzzed__Readme_0
                             |> Expect.equal [ { name = "", age = 105 } ]
@@ -75,16 +57,10 @@ input__Readme_0 =
 
 codec__Readme_0 : IR.Codec User__Readme_0
 codec__Readme_0 =
-    IR.record User__Readme_0 |> IR.field .name IR.string |> IR.field .age IR.int
-
-
-ir__Readme_0 : IR.IR
-ir__Readme_0 =
-    IR.Adapter.fromInput codec__Readme_0 input__Readme_0
-
-
-output__Readme_0 =
-    IR.Adapter.toOutput codec__Readme_0 ir__Readme_0
+    IR.record User__Readme_0
+        |> IR.field .name IR.string
+        |> IR.field .age IR.int
+        |> IR.endRecord
 
 
 json__Readme_0 =

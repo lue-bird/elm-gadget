@@ -1,9 +1,8 @@
 module IR.Adapter exposing
-    ( Codec
+    ( Codec(..)
     , Error
     , IR(..)
     , IRType(..)
-    , Transformer(..)
     , Variant(..)
     , VariantType(..)
     , fromInput
@@ -21,16 +20,10 @@ type alias Error =
 
 {-| TODO
 -}
-type alias Codec a =
-    Transformer a a
-
-
-{-| TODO
--}
-type Transformer input output
+type Codec a
     = Codec
-        { fromInput : input -> IR
-        , toOutput : IR -> Result Error output
+        { fromInput : a -> IR
+        , toOutput : IR -> Result Error a
         , irType : IRType
         }
 
