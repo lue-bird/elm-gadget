@@ -45,20 +45,19 @@ fuzzAdapter : Dict.Dict String (Fuzz.Fuzzer IR.IR) -> IR.IRType -> Fuzz.Fuzzer I
 fuzzAdapter overrides irType =
     case irType of
         IR.LabelledType labels innerType ->
-            Fuzz.map (IR.Labelled labels)
-                (Set.foldl
-                    (\label maybe ->
-                        case maybe of
-                            Nothing ->
-                                Dict.get label overrides
+            Set.foldl
+                (\label maybe ->
+                    case maybe of
+                        Nothing ->
+                            Dict.get label overrides
 
-                            _ ->
-                                maybe
-                    )
-                    Nothing
-                    labels
-                    |> Maybe.withDefault (fuzzAdapter overrides innerType)
+                        _ ->
+                            maybe
                 )
+                Nothing
+                labels
+                |> Maybe.withDefault (fuzzAdapter overrides innerType)
+                |> Fuzz.map (IR.Labelled labels)
 
         IR.BoolType ->
             Fuzz.bool |> Fuzz.map IR.Bool

@@ -34,7 +34,10 @@ personCodec : IR.Codec Person
 personCodec =
     IR.record Person
         |> IR.field .name
-            (IR.string |> IR.label "name")
+            (IR.string
+                |> IR.label "name"
+                |> IR.label "fuzzName"
+            )
         |> IR.field .heightInCentimetres
             (IR.float |> IR.label "heightInCentimetres")
         |> IR.field .pets
@@ -120,7 +123,7 @@ view ( seed1, seed2 ) =
             Fuzz.examples 1 fuzzer
 
         randomOverrides =
-            [ IR.Random.override "name" IR.string (Random.uniform "Ed" [ "Mario", "Leonardo", "Jeroen" ])
+            [ IR.Random.override "name" IR.string (Random.uniform "Bill" [ "George", "Sue" ])
             , IR.Random.override "heightInCentimetres" IR.float (Random.float 160 196)
             , IR.Random.override "dogName" IR.string (Random.uniform "Fido" [ "Kevin", "Rover", "Fifi" ])
             , IR.Random.override "series" IR.char (Random.uniform 'A' (List.range 66 90 |> List.map Char.fromCode))

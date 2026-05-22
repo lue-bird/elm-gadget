@@ -51,20 +51,19 @@ randomAdapter : Dict.Dict String (Random.Generator IR.IR) -> IR.IRType -> Random
 randomAdapter overrides irType =
     case irType of
         IR.LabelledType labels innerType ->
-            Random.map (IR.Labelled labels) <|
-                (Set.foldl
-                    (\label maybe ->
-                        case maybe of
-                            Nothing ->
-                                Dict.get label overrides
+            Set.foldl
+                (\label maybe ->
+                    case maybe of
+                        Nothing ->
+                            Dict.get label overrides
 
-                            _ ->
-                                maybe
-                    )
-                    Nothing
-                    labels
-                    |> Maybe.withDefault (randomAdapter overrides innerType)
+                        _ ->
+                            maybe
                 )
+                Nothing
+                labels
+                |> Maybe.withDefault (randomAdapter overrides innerType)
+                |> Random.map (IR.Labelled labels)
 
         IR.BoolType ->
             Random.uniform False [ True ] |> Random.map IR.Bool
