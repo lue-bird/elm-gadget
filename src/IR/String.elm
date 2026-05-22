@@ -372,28 +372,28 @@ stringParser =
 
 rawStringParser : Parser String
 rawStringParser =
-    P.loop "" rawStringParserHelp
+    P.succeed identity
+        |. P.chompIf (\c -> c == '(')
+        |= P.loop "" rawStringParserHelp
 
 
 rawStringParserHelp : String -> Parser (P.Step String String)
 rawStringParserHelp string =
-    P.succeed identity
-        |. P.chompIf (\c -> c == '(')
-        |= P.oneOf
-            [ P.token "/)"
-                |> P.map (\_ -> string ++ ")" |> P.Loop)
-            , P.token "//"
-                |> P.map (\_ -> string ++ "/" |> P.Loop)
-            , P.chompIf ((==) ')')
-                |> P.map (\_ -> P.Done string)
-            , P.chompIf ((==) '/')
-                |> P.map (\_ -> string ++ "/" |> P.Loop)
-            , P.succeed ()
-                |. P.chompIf (\c -> c /= ')' && c /= '/')
-                |. P.chompWhile (\c -> c /= ')' && c /= '/')
-                |> P.getChompedString
-                |> P.map (\s -> string ++ s |> P.Loop)
-            ]
+    P.oneOf
+        [ P.token "/)"
+            |> P.map (\_ -> string ++ ")" |> P.Loop)
+        , P.token "//"
+            |> P.map (\_ -> string ++ "/" |> P.Loop)
+        , P.chompIf ((==) ')')
+            |> P.map (\_ -> P.Done string)
+        , P.chompIf ((==) '/')
+            |> P.map (\_ -> string ++ "/" |> P.Loop)
+        , P.succeed ()
+            |. P.chompIf (\c -> c /= ')' && c /= '/')
+            |. P.chompWhile (\c -> c /= ')' && c /= '/')
+            |> P.getChompedString
+            |> P.map (\s -> string ++ s |> P.Loop)
+        ]
 
 
 quoteString : String -> String
