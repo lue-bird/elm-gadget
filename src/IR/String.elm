@@ -358,10 +358,11 @@ labelledParser =
         |= P.lazy (\() -> irParser)
 
 
-{-| This function comes from
+{-| The original version of this function comes from
 <https://github.com/myrho/elm-parser-extras/tree/1.0.1> but the implementation
 there seems to have a bug with an unguarded `chompWhile` leading to infinite
-looping. Fixed version is here.
+looping. This is a fixed version with all the generic stuff taken out so it just
+works for our use case.
 -}
 stringParser : Parser IR.IR
 stringParser =
