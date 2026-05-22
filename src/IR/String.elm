@@ -386,8 +386,6 @@ rawStringParserHelp string =
             |> P.map (\_ -> string ++ "/" |> P.Loop)
         , P.chompIf ((==) ')')
             |> P.map (\_ -> P.Done string)
-        , P.chompIf ((==) '/')
-            |> P.map (\_ -> string ++ "/" |> P.Loop)
         , P.succeed ()
             |. P.chompIf (\c -> c /= ')' && c /= '/')
             |. P.chompWhile (\c -> c /= ')' && c /= '/')
