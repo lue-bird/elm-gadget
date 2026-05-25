@@ -660,7 +660,7 @@ label label_ (Codec c) =
                         c.toOutput innerIR
 
                     _ ->
-                        Err "override toOutput failed"
+                        c.toOutput ir
         , irType =
             case c.irType of
                 LabelledType labels inner ->

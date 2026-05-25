@@ -16,8 +16,13 @@ type Override
 
 
 override : String -> IR.Codec a -> Random.Generator a -> Override
-override label codec inputFuzzer =
-    Override label (Random.map (IR.fromInput codec) inputFuzzer)
+override label codec inputGenerator =
+    Override label (Random.map (IR.fromInput codec) inputGenerator)
+
+
+generator : IR.Codec a -> Random.Generator a
+generator codec =
+    generatorWithOverrides [] codec
 
 
 generatorWithOverrides : List Override -> IR.Codec a -> Random.Generator a
@@ -25,26 +30,27 @@ generatorWithOverrides overrides codec =
     let
         overridesDict =
             overrides
-                |> List.map (\(Override label overrideFuzzer) -> ( label, overrideFuzzer ))
+                |> List.map (\(Override label generator_) -> ( label, generator_ ))
                 |> Dict.fromList
     in
-    IR.irType codec
-        |> randomAdapter overridesDict
+    generatorWithOverridesHelp overridesDict codec
         |> Random.andThen
-            (\irValue ->
-                case IR.toOutput codec irValue of
+            (\res ->
+                case res of
                     Ok b ->
                         Random.constant b
 
                     Err _ ->
                         -- let's hope this never happens...
-                        generator codec
+                        generatorWithOverrides overrides codec
             )
 
 
-generator : IR.Codec a -> Random.Generator a
-generator codec =
-    generatorWithOverrides [] codec
+generatorWithOverridesHelp : Dict.Dict String (Random.Generator IR.IR) -> IR.Codec a -> Random.Generator (Result IR.Error a)
+generatorWithOverridesHelp overridesDict codec =
+    IR.irType codec
+        |> randomAdapter overridesDict
+        |> Random.map (IR.toOutput codec)
 
 
 randomAdapter : Dict.Dict String (Random.Generator IR.IR) -> IR.IRType -> Random.Generator IR.IR
@@ -57,8 +63,8 @@ randomAdapter overrides irType =
                         Nothing ->
                             Dict.get label overrides
 
-                        _ ->
-                            maybe
+                        Just override_ ->
+                            Just override_
                 )
                 Nothing
                 labels

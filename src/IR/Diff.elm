@@ -673,7 +673,7 @@ patchHelp changes_ old_ irType_ =
                 |> Result.map (IR.Custom diffSelected)
 
         ( diff_, old__, type_ ) ->
-            Err ("mismatch between \n" ++ Debug.toString diff_ ++ "\n" ++ Debug.toString old__ ++ "\n" ++ Debug.toString type_)
+            Err "mismatch between diff and value"
 
 
 listPatchHelp : ListChange -> List IR.IR -> IR.IRType -> Maybe (List IR.IR)
