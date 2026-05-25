@@ -16,14 +16,21 @@ irTests =
         , roundTrip IR.int "Int"
         , roundTrip IR.float "Float"
         , roundTrip IR.char "Char"
-        , roundTrip (IR.string |> IR.label "hello world") "String"
+        , roundTrip (IR.string |> IR.label "fuzz-override") "String"
         , roundTrip (IR.list IR.bool) "List Bool"
         ]
 
 
 roundTrip : IR.Codec input -> String -> Test
 roundTrip codec name =
-    fuzz (IR.Fuzz.fuzzerWithOverrides [ IR.Fuzz.override "hello world" IR.string (Fuzz.constant "hello world") ] codec) (name ++ " fromInput -> toOutput roundtrip") <|
+    fuzz
+        (IR.Fuzz.fuzzerWithOverrides
+            [ IR.Fuzz.override "fuzz-override" IR.string (Fuzz.stringOfLengthBetween 0 6)
+            ]
+            codec
+        )
+        (name ++ " fromInput -> toOutput roundtrip")
+    <|
         \rec ->
             rec
                 |> IR.Adapter.fromInput codec
