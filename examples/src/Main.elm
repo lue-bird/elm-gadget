@@ -35,8 +35,8 @@ personCodec =
     IR.record Person
         |> IR.field .name
             (IR.string
-                |> IR.label "name"
-                |> IR.label "fuzzName"
+                |> IR.label "random-name"
+                |> IR.label "fuzz-name"
             )
         |> IR.field .heightInCentimetres
             (IR.float |> IR.label "heightInCentimetres")
@@ -109,7 +109,7 @@ view ( seed1, seed2 ) =
             personCodec
 
         fuzzOverrides =
-            [ IR.Fuzz.override "name" IR.string (Fuzz.oneOf (List.map Fuzz.constant [ "Ed", "Mario", "Leonardo", "Jeroen" ]))
+            [ IR.Fuzz.override "fuzz-name" IR.string (Fuzz.oneOf (List.map Fuzz.constant [ "Ed", "Mario", "Leonardo", "Jeroen" ]))
             , IR.Fuzz.override "heightInCentimetres" IR.float (Fuzz.floatRange 160 196)
             , IR.Fuzz.override "dogName" IR.string (Fuzz.oneOf (List.map Fuzz.constant [ "Fido", "Kevin", "Rover", "Fifi" ]))
             , IR.Fuzz.override "series" IR.char (Fuzz.oneOf (List.range 65 90 |> List.map Char.fromCode |> List.map Fuzz.constant))
@@ -123,7 +123,7 @@ view ( seed1, seed2 ) =
             Fuzz.examples 1 fuzzer
 
         randomOverrides =
-            [ IR.Random.override "name" IR.string (Random.uniform "Bill" [ "George", "Sue" ])
+            [ IR.Random.override "random-name" IR.string (Random.uniform "Bill" [ "George", "Sue" ])
             , IR.Random.override "heightInCentimetres" IR.float (Random.float 160 196)
             , IR.Random.override "dogName" IR.string (Random.uniform "Fido" [ "Kevin", "Rover", "Fifi" ])
             , IR.Random.override "series" IR.char (Random.uniform 'A' (List.range 66 90 |> List.map Char.fromCode))
