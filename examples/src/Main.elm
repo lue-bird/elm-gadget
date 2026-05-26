@@ -2,16 +2,16 @@ module Main exposing (..)
 
 import Browser
 import Fuzz
+import Gadget
+import Gadget.Diff
+import Gadget.Fuzz
+import Gadget.Html
+import Gadget.Json
+import Gadget.Random
+import Gadget.String
 import Html
 import Html.Attributes
 import Html.Events
-import IR
-import IR.Diff
-import IR.Fuzz
-import IR.Html
-import IR.Json
-import IR.Random
-import IR.String
 import Json.Decode as JD
 import Json.Encode as JE
 import Parser
@@ -30,24 +30,24 @@ type Pet
     | Robot Char Int
 
 
-personCodec : IR.Codec Person
-personCodec =
-    IR.record Person
-        |> IR.field .name
-            (IR.string
-                |> IR.label "random-name"
-                |> IR.label "fuzz-name"
+personGadget : Gadget.Gadget Person
+personGadget =
+    Gadget.record Person
+        |> Gadget.field .name
+            (Gadget.string
+                |> Gadget.label "random-name"
+                |> Gadget.label "fuzz-name"
             )
-        |> IR.field .heightInCentimetres
-            (IR.float |> IR.label "heightInCentimetres")
-        |> IR.field .pets
-            (IR.list petCodec)
-        |> IR.endRecord
+        |> Gadget.field .heightInCentimetres
+            (Gadget.float |> Gadget.label "heightInCentimetres")
+        |> Gadget.field .pets
+            (Gadget.list petGadget)
+        |> Gadget.endRecord
 
 
-petCodec : IR.Codec Pet
-petCodec =
-    IR.custom
+petGadget : Gadget.Gadget Pet
+petGadget =
+    Gadget.custom
         (\dog robot variant ->
             case variant of
                 Dog rec ->
@@ -56,16 +56,16 @@ petCodec =
                 Robot series model ->
                     robot series model
         )
-        |> IR.variant1 Dog
-            (IR.record (\name -> { name = name })
-                |> IR.field .name
-                    (IR.string |> IR.label "dogName")
-                |> IR.endRecord
+        |> Gadget.variant1 Dog
+            (Gadget.record (\name -> { name = name })
+                |> Gadget.field .name
+                    (Gadget.string |> Gadget.label "dogName")
+                |> Gadget.endRecord
             )
-        |> IR.variant2 Robot
-            (IR.char |> IR.label "series")
-            (IR.int |> IR.label "model")
-        |> IR.endCustom
+        |> Gadget.variant2 Robot
+            (Gadget.char |> Gadget.label "series")
+            (Gadget.int |> Gadget.label "model")
+        |> Gadget.endCustom
 
 
 main : Program () ( Int, Int ) Msg
@@ -105,33 +105,33 @@ init _ =
 view : ( Int, Int ) -> Html.Html Msg
 view ( seed1, seed2 ) =
     let
-        codec =
-            personCodec
+        gadget =
+            personGadget
 
         fuzzOverrides =
-            [ IR.Fuzz.override "fuzz-name" IR.string (Fuzz.oneOf (List.map Fuzz.constant [ "Ed", "Mario", "Leonardo", "Jeroen" ]))
-            , IR.Fuzz.override "heightInCentimetres" IR.float (Fuzz.floatRange 160 196)
-            , IR.Fuzz.override "dogName" IR.string (Fuzz.oneOf (List.map Fuzz.constant [ "Fido", "Kevin", "Rover", "Fifi" ]))
-            , IR.Fuzz.override "series" IR.char (Fuzz.oneOf (List.range 65 90 |> List.map Char.fromCode |> List.map Fuzz.constant))
-            , IR.Fuzz.override "model" IR.int (Fuzz.oneOf (List.range 1 5 |> List.map (\n -> n * 1000) |> List.map Fuzz.constant))
+            [ Gadget.Fuzz.override "fuzz-name" Gadget.string (Fuzz.oneOf (List.map Fuzz.constant [ "Ed", "Mario", "Leonardo", "Jeroen" ]))
+            , Gadget.Fuzz.override "heightInCentimetres" Gadget.float (Fuzz.floatRange 160 196)
+            , Gadget.Fuzz.override "dogName" Gadget.string (Fuzz.oneOf (List.map Fuzz.constant [ "Fido", "Kevin", "Rover", "Fifi" ]))
+            , Gadget.Fuzz.override "series" Gadget.char (Fuzz.oneOf (List.range 65 90 |> List.map Char.fromCode |> List.map Fuzz.constant))
+            , Gadget.Fuzz.override "model" Gadget.int (Fuzz.oneOf (List.range 1 5 |> List.map (\n -> n * 1000) |> List.map Fuzz.constant))
             ]
 
         fuzzer =
-            IR.Fuzz.fuzzerWithOverrides fuzzOverrides codec
+            Gadget.Fuzz.fuzzerWithOverrides fuzzOverrides gadget
 
         fuzzed =
             Fuzz.examples 1 fuzzer
 
         randomOverrides =
-            [ IR.Random.override "random-name" IR.string (Random.uniform "Bill" [ "George", "Sue" ])
-            , IR.Random.override "heightInCentimetres" IR.float (Random.float 160 196)
-            , IR.Random.override "dogName" IR.string (Random.uniform "Fido" [ "Kevin", "Rover", "Fifi" ])
-            , IR.Random.override "series" IR.char (Random.uniform 'A' (List.range 66 90 |> List.map Char.fromCode))
-            , IR.Random.override "model" IR.int (Random.uniform 1000 (List.range 2 5 |> List.map (\n -> n * 1000)))
+            [ Gadget.Random.override "random-name" Gadget.string (Random.uniform "Bill" [ "George", "Sue" ])
+            , Gadget.Random.override "heightInCentimetres" Gadget.float (Random.float 160 196)
+            , Gadget.Random.override "dogName" Gadget.string (Random.uniform "Fido" [ "Kevin", "Rover", "Fifi" ])
+            , Gadget.Random.override "series" Gadget.char (Random.uniform 'A' (List.range 66 90 |> List.map Char.fromCode))
+            , Gadget.Random.override "model" Gadget.int (Random.uniform 1000 (List.range 2 5 |> List.map (\n -> n * 1000)))
             ]
 
         randomGenerator =
-            IR.Random.generatorWithOverrides randomOverrides codec
+            Gadget.Random.generatorWithOverrides randomOverrides gadget
 
         firstValue =
             Random.step randomGenerator (Random.initialSeed seed1)
@@ -142,22 +142,22 @@ view ( seed1, seed2 ) =
                 |> Tuple.first
 
         diff =
-            IR.Diff.diff codec firstValue secondValue
+            Gadget.Diff.diff gadget firstValue secondValue
 
         patched =
-            IR.Diff.patch codec diff firstValue
+            Gadget.Diff.patch gadget diff firstValue
 
         encoded =
-            JE.encode 2 (IR.Json.encode codec firstValue)
+            JE.encode 2 (Gadget.Json.encode gadget firstValue)
 
         decoded =
-            JD.decodeString (IR.Json.decoder codec) encoded
+            JD.decodeString (Gadget.Json.decoder gadget) encoded
 
         printed =
-            IR.String.print codec firstValue
+            Gadget.String.print gadget firstValue
 
         parsed =
-            Parser.run (IR.String.parser codec) printed
+            Parser.run (Gadget.String.parser gadget) printed
     in
     Html.div []
         [ Html.h1 [] [ Html.text "elm-ir examples" ]
@@ -173,9 +173,9 @@ view ( seed1, seed2 ) =
         , head "Patched value equals second value?"
         , show (patched == Ok secondValue)
         , head "Html viewer (first value)"
-        , IR.Html.view codec firstValue
+        , Gadget.Html.view gadget firstValue
         , head "Html viewer (second value)"
-        , IR.Html.view codec secondValue
+        , Gadget.Html.view gadget secondValue
         , head "Printer (first value)"
         , Html.code [ Html.Attributes.class "withoutSpaces" ] [ Html.text printed ]
         , head "Parser (first value)"

@@ -79,7 +79,8 @@ unused =
     , NoUnused.Patterns.rule
     , NoUnused.Variables.rule
     , NoUnused.Exports.rule
-        |> Rule.ignoreErrorsForDirectories [ "src/IR" ]
+        |> Rule.ignoreErrorsForDirectories [ "src/Gadget" ]
+        |> Rule.ignoreErrorsForFiles [ "src/Gadget.elm" ]
     ]
         |> ignoreDocSnippets
 

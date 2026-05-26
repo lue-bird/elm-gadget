@@ -1,14 +1,16 @@
-# elm-ir
+# elm-gadget
 
 ## What?
 
-Convert between Elm data types and an intermediate representation (IR)
+Create Gadgets that convert between Elm data types and a generic intermediate
+representation (IR)
 
 ## Why?
 
-Because it makes it relatively easy to build cool tools (JSON encoders/decoders,
-fuzzers, random generators, diff/patchers, parser/printers, and any other
-bidirectional converters) for any Elm data type, with minimal boilerplate.
+Converting to IR makes it relatively easy to build cool tools (JSON
+encoders/decoders, fuzzers, random generators, diff/patchers, parser/printers,
+and any other bidirectional converters) for any Elm data type, with minimal
+boilerplate.
 
 ## Show me!
 
@@ -17,9 +19,9 @@ Do `npx run-pty run-pty.json` in the project root folder.
 ## How?
 
 ```elm
-import IR
-import IR.Fuzz
-import IR.Json
+import Gadget
+import Gadget.Fuzz
+import Gadget.Json
 import Fuzz
 import Json.Decode 
 
@@ -35,37 +37,37 @@ input =
     , age = 44 
     }
 
--- Just write an IR.Codec like this:
+-- Just write a Gadget like this:
 
-codec : IR.Codec User
-codec = 
-    IR.record User 
-        |> IR.field .name IR.string 
-        |> IR.field .age IR.int
-        |> IR.endRecord
+gadget : Gadget.Gadget User
+gadget = 
+    Gadget.record User 
+        |> Gadget.field .name Gadget.string 
+        |> Gadget.field .age Gadget.int
+        |> Gadget.endRecord
 
 -- Now we just need to write a JSON encoder and 
--- decoder for our IR type, and we'll be able to 
--- use our Codec to convert our User type to and 
--- from JSON. Here's a JSON IR adapter I made earlier:
+-- decoder for Gadgets, and we'll be able to 
+-- use it to convert our User type to and 
+-- from JSON. Here's a JSON adapter I made earlier:
 
 json = 
-    IR.Json.encode codec input
+    Gadget.Json.encode gadget input
 
 json --: Json.Decode.Value
 
 decoded = 
-    Json.Decode.decodeValue (IR.Json.decoder codec) json
+    Json.Decode.decodeValue (Gadget.Json.decoder gadget) json
 
 decoded --> Ok input
 
--- The best part is, we can use the exact same Codec 
+-- The best part is, we can use the exact same Gadget 
 -- for other things too. Say we want a fuzzer 
--- for testing: we just write a fuzzer for IR and we 
--- can use it with any Codec:
+-- for testing: we just write a fuzzer for Gadgets and we 
+-- can use it with any Gadget:
 
 fuzzed = 
-    Fuzz.examples 1 (IR.Fuzz.fuzzer codec)
+    Fuzz.examples 1 (Gadget.Fuzz.fuzzer gadget)
 
 fuzzed --> [ { age = 92, name = "o \n\\" } ]
 ```

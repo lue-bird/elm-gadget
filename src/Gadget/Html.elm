@@ -1,17 +1,17 @@
-module IR.Html exposing (..)
+module Gadget.Html exposing (..)
 
+import Gadget.IR as IR
 import Html as H
 import Html.Attributes as HA
-import IR.Adapter as IR
 import Set
 
 
-view : IR.Codec a -> a -> H.Html msg
+view : IR.Gadget a -> a -> H.Html msg
 view codec value =
     IR.fromInput codec value
         |> htmlAdapter
         |> List.singleton
-        |> H.article [ HA.class "elm-ir" ]
+        |> H.article [ HA.class "elm-gadget" ]
 
 
 primitive : H.Html msg -> (String -> H.Html msg) -> String -> String -> H.Html msg

@@ -1,8 +1,8 @@
-module IR.Diff exposing (..)
+module Gadget.Diff exposing (..)
 
 import Dict
 import Diff as ListDiffer
-import IR.Adapter as IR
+import Gadget.IR as IR
 import List.Extra
 import Maybe.Extra
 import Result.Extra
@@ -29,7 +29,7 @@ type ListChange
     | Repeat Int ListChange
 
 
-diff : IR.Codec a -> a -> a -> Diff
+diff : IR.Gadget a -> a -> a -> Diff
 diff codec old new =
     let
         oldIR =
@@ -407,7 +407,7 @@ default irType =
             IR.Product (List.map default fieldTypes)
 
 
-patch : IR.Codec a -> Diff -> a -> Result String a
+patch : IR.Gadget a -> Diff -> a -> Result String a
 patch codec delta old =
     let
         oldIR =
@@ -672,7 +672,7 @@ patchHelp changes_ old_ irType_ =
                     )
                 |> Result.map (IR.Custom diffSelected)
 
-        ( diff_, old__, type_ ) ->
+        _ ->
             Err "mismatch between diff and value"
 
 

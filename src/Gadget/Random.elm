@@ -1,7 +1,7 @@
-module IR.Random exposing (Override, generator, generatorWithOverrides, override)
+module Gadget.Random exposing (Override, generator, generatorWithOverrides, override)
 
 import Dict
-import IR.Adapter as IR
+import Gadget.IR as IR
 import Random
 import Random.Char
 import Random.Extra
@@ -15,17 +15,17 @@ type Override
     = Override String (Random.Generator IR.IR)
 
 
-override : String -> IR.Codec a -> Random.Generator a -> Override
+override : String -> IR.Gadget a -> Random.Generator a -> Override
 override label codec inputGenerator =
     Override label (Random.map (IR.fromInput codec) inputGenerator)
 
 
-generator : IR.Codec a -> Random.Generator a
+generator : IR.Gadget a -> Random.Generator a
 generator codec =
     generatorWithOverrides [] codec
 
 
-generatorWithOverrides : List Override -> IR.Codec a -> Random.Generator a
+generatorWithOverrides : List Override -> IR.Gadget a -> Random.Generator a
 generatorWithOverrides overrides codec =
     let
         overridesDict =
@@ -46,7 +46,7 @@ generatorWithOverrides overrides codec =
             )
 
 
-generatorWithOverridesHelp : Dict.Dict String (Random.Generator IR.IR) -> IR.Codec a -> Random.Generator (Result IR.Error a)
+generatorWithOverridesHelp : Dict.Dict String (Random.Generator IR.IR) -> IR.Gadget a -> Random.Generator (Result IR.Error a)
 generatorWithOverridesHelp overridesDict codec =
     IR.irType codec
         |> randomAdapter overridesDict

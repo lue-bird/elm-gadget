@@ -5,9 +5,9 @@ module DocumentationCodeSnippetTest exposing (tests)
 
 import Expect
 import Fuzz
-import IR
-import IR.Fuzz
-import IR.Json
+import Gadget
+import Gadget.Fuzz
+import Gadget.Json
 import Json.Decode
 import Test
 
@@ -55,21 +55,23 @@ input__Readme_0 =
     { name = "Ed", age = 44 }
 
 
-codec__Readme_0 : IR.Codec User__Readme_0
-codec__Readme_0 =
-    IR.record User__Readme_0
-        |> IR.field .name IR.string
-        |> IR.field .age IR.int
-        |> IR.endRecord
+gadget__Readme_0 : Gadget.Gadget User__Readme_0
+gadget__Readme_0 =
+    Gadget.record User__Readme_0
+        |> Gadget.field .name Gadget.string
+        |> Gadget.field .age Gadget.int
+        |> Gadget.endRecord
 
 
 json__Readme_0 =
-    IR.Json.encode codec__Readme_0 input__Readme_0
+    Gadget.Json.encode gadget__Readme_0 input__Readme_0
 
 
 decoded__Readme_0 =
-    Json.Decode.decodeValue (IR.Json.decoder codec__Readme_0) json__Readme_0
+    Json.Decode.decodeValue
+        (Gadget.Json.decoder gadget__Readme_0)
+        json__Readme_0
 
 
 fuzzed__Readme_0 =
-    Fuzz.examples 1 (IR.Fuzz.fuzzer codec__Readme_0)
+    Fuzz.examples 1 (Gadget.Fuzz.fuzzer gadget__Readme_0)

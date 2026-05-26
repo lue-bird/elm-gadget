@@ -1,29 +1,28 @@
-module IR.Adapter exposing
-    ( Codec(..)
-    , Error
-    , IR(..)
-    , IRType(..)
-    , Variant(..)
-    , VariantType(..)
-    , fromInput
-    , irType
-    , toOutput
+module Gadget.IR exposing
+    ( Gadget(..), Error, IR(..), IRType(..), Variant(..), VariantType(..)
+    , fromInput, toOutput, irType
     )
 
-{-| TODO
+{-|
+
+@docs Gadget, Error, IR, IRType, Variant, VariantType
+@docs fromInput, toOutput, irType
+
 -}
 
 import Set
 
 
+{-| TODO
+-}
 type alias Error =
     String
 
 
 {-| TODO
 -}
-type Codec a
-    = Codec
+type Gadget a
+    = Gadget
         { fromInput : a -> IR
         , toOutput : IR -> Result Error a
         , irType : IRType
@@ -82,20 +81,20 @@ type VariantType
 
 {-| TODO
 -}
-fromInput : Codec a -> a -> IR
-fromInput (Codec c) input =
+fromInput : Gadget a -> a -> IR
+fromInput (Gadget c) input =
     c.fromInput input
 
 
 {-| TODO
 -}
-irType : Codec a -> IRType
-irType (Codec c) =
+irType : Gadget a -> IRType
+irType (Gadget c) =
     c.irType
 
 
 {-| TODO
 -}
-toOutput : Codec a -> IR -> Result Error a
-toOutput (Codec c) a =
+toOutput : Gadget a -> IR -> Result Error a
+toOutput (Gadget c) a =
     c.toOutput a

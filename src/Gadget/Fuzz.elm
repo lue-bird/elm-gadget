@@ -1,17 +1,17 @@
-module IR.Fuzz exposing (Override, fuzzer, fuzzerWithOverrides, override)
+module Gadget.Fuzz exposing (Override, fuzzer, fuzzerWithOverrides, override)
 
 import Dict
 import Fuzz
-import IR.Adapter as IR
+import Gadget.IR as IR
 import Set
 
 
-fuzzer : IR.Codec a -> Fuzz.Fuzzer a
+fuzzer : IR.Gadget a -> Fuzz.Fuzzer a
 fuzzer codec =
     fuzzerWithOverrides [] codec
 
 
-fuzzerWithOverrides : List Override -> IR.Codec a -> Fuzz.Fuzzer a
+fuzzerWithOverrides : List Override -> IR.Gadget a -> Fuzz.Fuzzer a
 fuzzerWithOverrides overrides codec =
     let
         overridesDict =
@@ -36,7 +36,7 @@ type Override
     = Override String (Fuzz.Fuzzer IR.IR)
 
 
-override : String -> IR.Codec a -> Fuzz.Fuzzer a -> Override
+override : String -> IR.Gadget a -> Fuzz.Fuzzer a -> Override
 override label codec inputFuzzer =
     Override label (Fuzz.map (IR.fromInput codec) inputFuzzer)
 

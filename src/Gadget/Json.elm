@@ -1,19 +1,19 @@
-module IR.Json exposing (..)
+module Gadget.Json exposing (..)
 
-import IR.Adapter as IR
+import Gadget.IR as IR
 import Json.Decode as JD
 import Json.Encode as JE
 import Set
 
 
-encode : IR.Codec a -> a -> JE.Value
+encode : IR.Gadget a -> a -> JE.Value
 encode codec value =
     value
         |> IR.fromInput codec
         |> encodeAdapter
 
 
-decoder : IR.Codec a -> JD.Decoder a
+decoder : IR.Gadget a -> JD.Decoder a
 decoder codec =
     decodeAdapter
         |> JD.andThen

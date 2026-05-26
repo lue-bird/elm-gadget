@@ -1,11 +1,11 @@
-module IR.String exposing (parser, print)
+module Gadget.String exposing (parser, print)
 
-import IR.Adapter as IR
+import Gadget.IR as IR
 import Parser as P exposing ((|.), (|=), Parser)
 import Set
 
 
-print : IR.Codec a -> a -> String
+print : IR.Gadget a -> a -> String
 print codec value =
     IR.fromInput codec value
         |> printAdapter
@@ -106,7 +106,7 @@ printAdapter irValue =
                 items
 
 
-parser : IR.Codec a -> Parser a
+parser : IR.Gadget a -> Parser a
 parser codec =
     irParser
         |> P.andThen

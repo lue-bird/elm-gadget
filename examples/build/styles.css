@@ -29,7 +29,7 @@ button {
     box-shadow: 0px 0px 5px 5px rgb(210, 210, 255);
 }
 
-.elm-ir {
+.elm-gadget {
     --primitive-bg: hsl(0 100 95);
     --combinator-bg: hsl(0 100 99);
 

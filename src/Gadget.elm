@@ -1,11 +1,11 @@
-module IR exposing
-    ( Codec
+module Gadget exposing
+    ( Gadget
     , bool, char, string, int, float
     , list, array, dict, set
     , tuple, triple
-    , RecordCodecBuilder, record, field, endRecord
+    , RecordGadgetBuilder, record, field, endRecord
     , maybe, result
-    , CustomCodecBuilder, custom
+    , CustomGadgetBuilder, custom
     , variant0, variant1, variant2, variant3, variant4, variant5
     , endCustom
     , map
@@ -15,22 +15,20 @@ module IR exposing
 {-|
 
 
-# elm-ir
-
-Convert between Elm data types and an intermediate representation (IR)
+# elm-gadget
 
 
-## IR codecs
+## Gadgets
 
-@docs Codec
+@docs Gadget
 
 
-## IR primitives
+## Primitives
 
 @docs bool, char, string, int, float
 
 
-## IR combinators
+## Combinators
 
 
 ### Common data types
@@ -44,23 +42,23 @@ Convert between Elm data types and an intermediate representation (IR)
 ### Product types
 
 @docs tuple, triple
-@docs RecordCodecBuilder, record, field, endRecord
+@docs RecordGadgetBuilder, record, field, endRecord
 
 
 ### Custom types
 
 @docs maybe, result
-@docs CustomCodecBuilder, custom
+@docs CustomGadgetBuilder, custom
 @docs variant0, variant1, variant2, variant3, variant4, variant5
 @docs endCustom
 
 
-### Transforming codec input and output
+### Transforming input and output
 
 @docs map
 
 
-### Labelling codecs
+### Labels
 
 @docs label
 
@@ -68,21 +66,21 @@ Convert between Elm data types and an intermediate representation (IR)
 
 import Array
 import Dict
-import IR.Adapter exposing (Codec(..), Error, IR(..), IRType(..), Variant(..), VariantType(..))
+import Gadget.IR exposing (Error, Gadget(..), IR(..), IRType(..), Variant(..), VariantType(..))
 import Result.Extra
 import Set
 
 
 {-| TODO
 -}
-type alias Codec a =
-    IR.Adapter.Codec a
+type alias Gadget a =
+    Gadget.IR.Gadget a
 
 
 {-| TODO
 -}
-type RecordCodecBuilder input output
-    = RecordCodecBuilder
+type RecordGadgetBuilder input output
+    = RecordGadgetBuilder
         { fromInput : input -> List IR
         , toOutput : List IR -> Result Error output
         , irType : List IRType
@@ -91,8 +89,8 @@ type RecordCodecBuilder input output
 
 {-| TODO
 -}
-type CustomCodecBuilder input hasAtLeastOneVariant output
-    = CustomCodec
+type CustomGadgetBuilder input hasAtLeastOneVariant output
+    = CustomGadgetBuilder
         { match : input
         , fromIR : IR -> Result Error output
         , variantTypes : List VariantType
@@ -102,9 +100,9 @@ type CustomCodecBuilder input hasAtLeastOneVariant output
 
 {-| TODO
 -}
-bool : Codec Bool
+bool : Gadget Bool
 bool =
-    Codec
+    Gadget
         { fromInput = Bool
         , toOutput =
             \ir ->
@@ -120,9 +118,9 @@ bool =
 
 {-| TODO
 -}
-char : Codec Char
+char : Gadget Char
 char =
-    Codec
+    Gadget
         { fromInput = Char
         , toOutput =
             \ir ->
@@ -138,9 +136,9 @@ char =
 
 {-| TODO
 -}
-string : Codec String
+string : Gadget String
 string =
-    Codec
+    Gadget
         { fromInput = String
         , toOutput =
             \ir ->
@@ -156,9 +154,9 @@ string =
 
 {-| TODO
 -}
-int : Codec Int
+int : Gadget Int
 int =
-    Codec
+    Gadget
         { fromInput = Int
         , toOutput =
             \ir ->
@@ -174,9 +172,9 @@ int =
 
 {-| TODO
 -}
-float : Codec Float
+float : Gadget Float
 float =
-    Codec
+    Gadget
         { fromInput = Float
         , toOutput =
             \ir ->
@@ -192,9 +190,9 @@ float =
 
 {-| TODO
 -}
-list : Codec a -> Codec (List a)
-list (Codec item) =
-    Codec
+list : Gadget a -> Gadget (List a)
+list (Gadget item) =
+    Gadget
         { fromInput = \items -> List (List.map item.fromInput items)
         , toOutput =
             \ir ->
@@ -212,9 +210,9 @@ list (Codec item) =
 {-| TODO
 -}
 dict :
-    Codec comparable
-    -> Codec v
-    -> Codec (Dict.Dict comparable v)
+    Gadget comparable
+    -> Gadget v
+    -> Gadget (Dict.Dict comparable v)
 dict key value =
     list (tuple key value)
         |> map Dict.fromList Dict.toList
@@ -223,8 +221,8 @@ dict key value =
 {-| TODO
 -}
 set :
-    Codec comparable
-    -> Codec (Set.Set comparable)
+    Gadget comparable
+    -> Gadget (Set.Set comparable)
 set value =
     list value
         |> map Set.fromList Set.toList
@@ -232,7 +230,7 @@ set value =
 
 {-| TODO
 -}
-array : Codec a -> Codec (Array.Array a)
+array : Gadget a -> Gadget (Array.Array a)
 array item =
     list item
         |> map Array.fromList Array.toList
@@ -240,7 +238,7 @@ array item =
 
 {-| TODO
 -}
-maybe : Codec a -> Codec (Maybe a)
+maybe : Gadget a -> Gadget (Maybe a)
 maybe item =
     custom
         (\just nothing variant ->
@@ -258,7 +256,7 @@ maybe item =
 
 {-| TODO
 -}
-result : Codec x -> Codec a -> Codec (Result x a)
+result : Gadget x -> Gadget a -> Gadget (Result x a)
 result x a =
     custom
         (\err ok variant ->
@@ -276,7 +274,7 @@ result x a =
 
 {-| TODO
 -}
-tuple : Codec a -> Codec b -> Codec ( a, b )
+tuple : Gadget a -> Gadget b -> Gadget ( a, b )
 tuple a b =
     record Tuple.pair
         |> field Tuple.first a
@@ -286,7 +284,7 @@ tuple a b =
 
 {-| TODO
 -}
-triple : Codec a -> Codec b -> Codec c -> Codec ( a, b, c )
+triple : Gadget a -> Gadget b -> Gadget c -> Gadget ( a, b, c )
 triple a b c =
     record (\a_ b_ c_ -> ( a_, b_, c_ ))
         |> field (\( a_, _, _ ) -> a_) a
@@ -297,9 +295,9 @@ triple a b c =
 
 {-| TODO
 -}
-custom : input -> CustomCodecBuilder input Never output
+custom : input -> CustomGadgetBuilder input Never output
 custom match =
-    CustomCodec
+    CustomGadgetBuilder
         { match = match
         , index = 0
         , fromIR = \_ -> Err "custom toOutput failed"
@@ -311,10 +309,10 @@ custom match =
 -}
 variant0 :
     output
-    -> CustomCodecBuilder (IR -> input) variantType output
-    -> CustomCodecBuilder input () output
-variant0 ctor (CustomCodec prev) =
-    CustomCodec
+    -> CustomGadgetBuilder (IR -> input) variantType output
+    -> CustomGadgetBuilder input () output
+variant0 ctor (CustomGadgetBuilder prev) =
+    CustomGadgetBuilder
         { match = prev.match <| Custom prev.index Variant0
         , index = prev.index + 1
         , fromIR =
@@ -339,11 +337,11 @@ variant0 ctor (CustomCodec prev) =
 -}
 variant1 :
     (arg1 -> output)
-    -> Codec arg1
-    -> CustomCodecBuilder ((arg1 -> IR) -> input) variantType output
-    -> CustomCodecBuilder input () output
-variant1 ctor (Codec argfns) (CustomCodec prev) =
-    CustomCodec
+    -> Gadget arg1
+    -> CustomGadgetBuilder ((arg1 -> IR) -> input) variantType output
+    -> CustomGadgetBuilder input () output
+variant1 ctor (Gadget argfns) (CustomGadgetBuilder prev) =
+    CustomGadgetBuilder
         { match = prev.match <| \arg -> Custom prev.index (Variant1 (argfns.fromInput arg))
         , index = prev.index + 1
         , fromIR =
@@ -368,12 +366,12 @@ variant1 ctor (Codec argfns) (CustomCodec prev) =
 -}
 variant2 :
     (arg1 -> arg2 -> output)
-    -> Codec arg1
-    -> Codec arg2
-    -> CustomCodecBuilder ((arg1 -> arg2 -> IR) -> input) variantType output
-    -> CustomCodecBuilder input () output
-variant2 ctor (Codec arg1fns) (Codec arg2fns) (CustomCodec prev) =
-    CustomCodec
+    -> Gadget arg1
+    -> Gadget arg2
+    -> CustomGadgetBuilder ((arg1 -> arg2 -> IR) -> input) variantType output
+    -> CustomGadgetBuilder input () output
+variant2 ctor (Gadget arg1fns) (Gadget arg2fns) (CustomGadgetBuilder prev) =
+    CustomGadgetBuilder
         { match = prev.match <| \arg1 arg2 -> Custom prev.index (Variant2 (arg1fns.fromInput arg1) (arg2fns.fromInput arg2))
         , index = prev.index + 1
         , fromIR =
@@ -398,13 +396,13 @@ variant2 ctor (Codec arg1fns) (Codec arg2fns) (CustomCodec prev) =
 -}
 variant3 :
     (arg1 -> arg2 -> arg3 -> output)
-    -> Codec arg1
-    -> Codec arg2
-    -> Codec arg3
-    -> CustomCodecBuilder ((arg1 -> arg2 -> arg3 -> IR) -> input) variantType output
-    -> CustomCodecBuilder input () output
-variant3 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (CustomCodec prev) =
-    CustomCodec
+    -> Gadget arg1
+    -> Gadget arg2
+    -> Gadget arg3
+    -> CustomGadgetBuilder ((arg1 -> arg2 -> arg3 -> IR) -> input) variantType output
+    -> CustomGadgetBuilder input () output
+variant3 ctor (Gadget arg1fns) (Gadget arg2fns) (Gadget arg3fns) (CustomGadgetBuilder prev) =
+    CustomGadgetBuilder
         { match =
             prev.match <|
                 \arg1 arg2 arg3 ->
@@ -443,14 +441,14 @@ variant3 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (CustomCodec prev)
 -}
 variant4 :
     (arg1 -> arg2 -> arg3 -> arg4 -> output)
-    -> Codec arg1
-    -> Codec arg2
-    -> Codec arg3
-    -> Codec arg4
-    -> CustomCodecBuilder ((arg1 -> arg2 -> arg3 -> arg4 -> IR) -> input) variantType output
-    -> CustomCodecBuilder input () output
-variant4 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (Codec arg4fns) (CustomCodec prev) =
-    CustomCodec
+    -> Gadget arg1
+    -> Gadget arg2
+    -> Gadget arg3
+    -> Gadget arg4
+    -> CustomGadgetBuilder ((arg1 -> arg2 -> arg3 -> arg4 -> IR) -> input) variantType output
+    -> CustomGadgetBuilder input () output
+variant4 ctor (Gadget arg1fns) (Gadget arg2fns) (Gadget arg3fns) (Gadget arg4fns) (CustomGadgetBuilder prev) =
+    CustomGadgetBuilder
         { match =
             prev.match <|
                 \arg1 arg2 arg3 arg4 ->
@@ -492,15 +490,15 @@ variant4 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (Codec arg4fns) (C
 -}
 variant5 :
     (arg1 -> arg2 -> arg3 -> arg4 -> arg5 -> output)
-    -> Codec arg1
-    -> Codec arg2
-    -> Codec arg3
-    -> Codec arg4
-    -> Codec arg5
-    -> CustomCodecBuilder ((arg1 -> arg2 -> arg3 -> arg4 -> arg5 -> IR) -> input) variantType output
-    -> CustomCodecBuilder input () output
-variant5 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (Codec arg4fns) (Codec arg5fns) (CustomCodec prev) =
-    CustomCodec
+    -> Gadget arg1
+    -> Gadget arg2
+    -> Gadget arg3
+    -> Gadget arg4
+    -> Gadget arg5
+    -> CustomGadgetBuilder ((arg1 -> arg2 -> arg3 -> arg4 -> arg5 -> IR) -> input) variantType output
+    -> CustomGadgetBuilder input () output
+variant5 ctor (Gadget arg1fns) (Gadget arg2fns) (Gadget arg3fns) (Gadget arg4fns) (Gadget arg5fns) (CustomGadgetBuilder prev) =
+    CustomGadgetBuilder
         { match =
             prev.match <|
                 \arg1 arg2 arg3 arg4 arg5 ->
@@ -543,19 +541,20 @@ variant5 ctor (Codec arg1fns) (Codec arg2fns) (Codec arg3fns) (Codec arg4fns) (C
 
 {-| TODO
 -}
-endCustom : CustomCodecBuilder (a -> IR) () a -> Codec a
-endCustom (CustomCodec prev) =
-    Codec
+endCustom : CustomGadgetBuilder (a -> IR) () a -> Gadget a
+endCustom (CustomGadgetBuilder prev) =
+    Gadget
         { fromInput = prev.match
         , toOutput = prev.fromIR
         , irType =
             case List.reverse prev.variantTypes of
                 [] ->
                     -- we know this can't happen, because if the second type
-                    -- variable of CustomCodec is `()`, then we know that we've
-                    -- used at least one `variantX` function, so the list of
-                    -- variants can't be empty. So it's ok to use a spurious
-                    -- Variant0Type here, because this will never get produced.
+                    -- variable of CustomGadgetBuilder is `()`, then we know
+                    -- that we've used at least one `variantX` function, so the
+                    -- list of variants can't be empty. So it's ok to use a
+                    -- spurious Variant0Type here, because this will never get
+                    -- produced.
                     CustomType Variant0Type []
 
                 firstVariantType :: restVariantTypes ->
@@ -565,9 +564,9 @@ endCustom (CustomCodec prev) =
 
 {-| TODO
 -}
-record : output -> RecordCodecBuilder input output
+record : output -> RecordGadgetBuilder input output
 record ctor =
-    RecordCodecBuilder
+    RecordGadgetBuilder
         { fromInput = \_ -> []
         , toOutput = \_ -> Ok ctor
         , irType = []
@@ -578,16 +577,16 @@ record ctor =
 -}
 field :
     (input -> field)
-    -> Codec field
-    -> RecordCodecBuilder input (field -> output)
-    -> RecordCodecBuilder input output
-field getter (Codec codec) (RecordCodecBuilder builder) =
-    RecordCodecBuilder
+    -> Gadget field
+    -> RecordGadgetBuilder input (field -> output)
+    -> RecordGadgetBuilder input output
+field getter (Gadget gadget) (RecordGadgetBuilder builder) =
+    RecordGadgetBuilder
         { fromInput =
             \input ->
                 let
                     thisField =
-                        codec.fromInput (getter input)
+                        gadget.fromInput (getter input)
 
                     prevFields =
                         builder.fromInput input
@@ -599,20 +598,20 @@ field getter (Codec codec) (RecordCodecBuilder builder) =
                     thisField :: prevFields ->
                         Result.map2 (\ctor val -> ctor val)
                             (builder.toOutput prevFields)
-                            (codec.toOutput thisField)
+                            (gadget.toOutput thisField)
 
                     [] ->
                         Err "expecting a Product field"
         , irType =
-            codec.irType :: builder.irType
+            gadget.irType :: builder.irType
         }
 
 
 {-| TODO
 -}
-endRecord : RecordCodecBuilder a a -> Codec a
-endRecord (RecordCodecBuilder builder) =
-    Codec
+endRecord : RecordGadgetBuilder a a -> Gadget a
+endRecord (RecordGadgetBuilder builder) =
+    Gadget
         { fromInput =
             \input ->
                 Product (List.reverse (builder.fromInput input))
@@ -633,10 +632,10 @@ endRecord (RecordCodecBuilder builder) =
 map :
     (a -> b)
     -> (b -> a)
-    -> Codec a
-    -> Codec b
-map aToB bToA (Codec prev) =
-    Codec
+    -> Gadget a
+    -> Gadget b
+map aToB bToA (Gadget prev) =
+    Gadget
         { fromInput = bToA >> prev.fromInput
         , toOutput = prev.toOutput >> Result.map aToB
         , irType = prev.irType
@@ -645,9 +644,9 @@ map aToB bToA (Codec prev) =
 
 {-| TODO
 -}
-label : String -> Codec a -> Codec a
-label label_ (Codec c) =
-    Codec
+label : String -> Gadget a -> Gadget a
+label label_ (Gadget c) =
+    Gadget
         { fromInput =
             \input ->
                 case c.fromInput input of

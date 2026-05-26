@@ -1,6 +1,6 @@
 module TestHelpers exposing (..)
 
-import IR
+import Gadget
 
 
 type alias Record =
@@ -13,16 +13,16 @@ type alias Record =
     }
 
 
-recordCodec : IR.Codec Record
+recordCodec : Gadget.Gadget Record
 recordCodec =
-    IR.record Record
-        |> IR.field .bool IR.bool
-        |> IR.field .int IR.int
-        |> IR.field .float IR.float
-        |> IR.field .string IR.string
-        |> IR.field .char IR.char
-        |> IR.field .custom customCodec
-        |> IR.endRecord
+    Gadget.record Record
+        |> Gadget.field .bool Gadget.bool
+        |> Gadget.field .int Gadget.int
+        |> Gadget.field .float Gadget.float
+        |> Gadget.field .string Gadget.string
+        |> Gadget.field .char Gadget.char
+        |> Gadget.field .custom customCodec
+        |> Gadget.endRecord
 
 
 type Custom
@@ -34,9 +34,9 @@ type Custom
     | Var5 Bool Bool Bool Bool Bool
 
 
-customCodec : IR.Codec Custom
+customCodec : Gadget.Gadget Custom
 customCodec =
-    IR.custom
+    Gadget.custom
         (\v0 v1 v2 v3 v4 v5 v ->
             case v of
                 Var0 ->
@@ -57,10 +57,10 @@ customCodec =
                 Var5 b1 b2 b3 b4 b5 ->
                     v5 b1 b2 b3 b4 b5
         )
-        |> IR.variant0 Var0
-        |> IR.variant1 Var1 (IR.list IR.bool)
-        |> IR.variant2 Var2 IR.int (IR.tuple IR.bool IR.char)
-        |> IR.variant3 Var3 IR.bool IR.bool IR.bool
-        |> IR.variant4 Var4 IR.bool IR.bool IR.bool IR.bool
-        |> IR.variant5 Var5 IR.bool IR.bool IR.bool IR.bool IR.bool
-        |> IR.endCustom
+        |> Gadget.variant0 Var0
+        |> Gadget.variant1 Var1 (Gadget.list Gadget.bool)
+        |> Gadget.variant2 Var2 Gadget.int (Gadget.tuple Gadget.bool Gadget.char)
+        |> Gadget.variant3 Var3 Gadget.bool Gadget.bool Gadget.bool
+        |> Gadget.variant4 Var4 Gadget.bool Gadget.bool Gadget.bool Gadget.bool
+        |> Gadget.variant5 Var5 Gadget.bool Gadget.bool Gadget.bool Gadget.bool Gadget.bool
+        |> Gadget.endCustom
