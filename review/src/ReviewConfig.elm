@@ -33,15 +33,10 @@ config =
         , simplify
         , snippets
         ]
-        |> ignoreResearch
 
 
 ignoreDocSnippets =
     List.map (Rule.ignoreErrorsForFiles [ "tests/DocumentationCodeSnippetTest.elm" ])
-
-
-ignoreResearch =
-    List.map (Rule.ignoreErrorsForDirectories [ "src/Research" ])
 
 
 docs =
@@ -79,7 +74,7 @@ unused =
     , NoUnused.Patterns.rule
     , NoUnused.Variables.rule
     , NoUnused.Exports.rule
-        |> Rule.ignoreErrorsForDirectories [ "src/Gadget" ]
+        |> Rule.ignoreErrorsForDirectories [ "src/Gadget", "tests/Gadget" ]
         |> Rule.ignoreErrorsForFiles [ "src/Gadget.elm" ]
     ]
         |> ignoreDocSnippets

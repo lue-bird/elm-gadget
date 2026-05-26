@@ -1,4 +1,4 @@
-module Gadget.DiffTest exposing (..)
+module Test.DiffTest exposing (..)
 
 import Expect
 import Gadget
