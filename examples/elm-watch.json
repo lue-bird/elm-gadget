@@ -1,6 +1,6 @@
 {
     "targets": {
-        "elm-ir": {
+        "elm-gadget": {
             "inputs": [
                 "src/Main.elm"
             ],

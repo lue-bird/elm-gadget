@@ -160,7 +160,7 @@ view ( seed1, seed2 ) =
             Parser.run (Gadget.String.parser gadget) printed
     in
     Html.div []
-        [ Html.h1 [] [ Html.text "elm-ir examples" ]
+        [ Html.h1 [] [ Html.text "elm-gadget examples" ]
         , Html.button [ Html.Events.onClick Clicked ] [ Html.text "Click to regenerate!" ]
         , head "Random generator (first value)"
         , show firstValue
