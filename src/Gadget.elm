@@ -61,7 +61,15 @@ If you want to develop your own adapters, see the [Gadget.IR](Gadget-IR) module.
 
 import Array
 import Dict
-import Gadget.IR exposing (Error, Gadget(..), IR(..), IRType(..), Variant(..), VariantType(..))
+import Gadget.IR
+    exposing
+        ( Error
+        , Gadget(..)
+        , IR(..)
+        , IRType(..)
+        , Variant(..)
+        , VariantType(..)
+        )
 import Result.Extra
 import Set
 
