@@ -602,7 +602,7 @@ field getter (Codec codec) (RecordCodecBuilder builder) =
                             (codec.toOutput thisField)
 
                     [] ->
-                        Err "andMap toOutput failed"
+                        Err "expecting a Product field"
         , irType =
             codec.irType :: builder.irType
         }
@@ -623,7 +623,7 @@ endRecord (RecordCodecBuilder builder) =
                         builder.toOutput (List.reverse fields)
 
                     _ ->
-                        Err ""
+                        Err "expecting a Product"
         , irType = ProductType (List.reverse builder.irType)
         }
 
