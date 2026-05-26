@@ -1,6 +1,6 @@
 {
     "type": "package",
-    "name": "edkelly303/elm-ir",
+    "name": "edkelly303/elm-gadget",
     "summary": "Convert between Elm data types and an intermediate representation (IR)",
     "license": "BSD-3-Clause",
     "version": "1.0.0",
