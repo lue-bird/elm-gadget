@@ -40,7 +40,7 @@ tests =
                     "2"
                     (\() ->
                         fuzzed__Readme_0
-                            |> Expect.equal [ { name = "", age = 105 } ]
+                            |> Expect.equal [ { age = 92, name = "o \n\\" } ]
                     )
                 ]
             ]

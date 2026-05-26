@@ -67,5 +67,5 @@ decoded --> Ok input
 fuzzed = 
     Fuzz.examples 1 (IR.Fuzz.fuzzer codec)
 
-fuzzed --> [ { name = "", age = 105 } ]
+fuzzed --> [ { age = 92, name = "o \n\\" } ]
 ```

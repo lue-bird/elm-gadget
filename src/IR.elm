@@ -83,9 +83,9 @@ type alias Codec a =
 -}
 type RecordCodecBuilder input output
     = RecordCodecBuilder
-        { fromInput : input -> IR
-        , toOutput : IR -> Result Error output
-        , irType : IRType
+        { fromInput : input -> List IR
+        , toOutput : List IR -> Result Error output
+        , irType : List IRType
         }
 
 
@@ -568,16 +568,9 @@ endCustom (CustomCodec prev) =
 record : output -> RecordCodecBuilder input output
 record ctor =
     RecordCodecBuilder
-        { fromInput = \_ -> Product []
-        , toOutput =
-            \ir ->
-                case ir of
-                    Product [] ->
-                        Ok ctor
-
-                    _ ->
-                        Err "succeed toOutput failed"
-        , irType = ProductType []
+        { fromInput = \_ -> []
+        , toOutput = \_ -> Ok ctor
+        , irType = []
         }
 
 
@@ -591,30 +584,27 @@ field :
 field getter (Codec codec) (RecordCodecBuilder builder) =
     RecordCodecBuilder
         { fromInput =
-            \a ->
-                case builder.fromInput a of
-                    Product prevFields ->
-                        Product (codec.fromInput (getter a) :: prevFields)
+            \input ->
+                let
+                    thisField =
+                        codec.fromInput (getter input)
 
-                    _ ->
-                        Product [ codec.fromInput (getter a) ]
+                    prevFields =
+                        builder.fromInput input
+                in
+                thisField :: prevFields
         , toOutput =
-            \ir ->
-                case ir of
-                    Product (thisField :: prevFields) ->
+            \fields ->
+                case fields of
+                    thisField :: prevFields ->
                         Result.map2 (\ctor val -> ctor val)
-                            (builder.toOutput (Product prevFields))
+                            (builder.toOutput prevFields)
                             (codec.toOutput thisField)
 
-                    _ ->
+                    [] ->
                         Err "andMap toOutput failed"
         , irType =
-            case builder.irType of
-                ProductType prevFieldTypes ->
-                    ProductType (codec.irType :: prevFieldTypes)
-
-                _ ->
-                    ProductType [ codec.irType ]
+            codec.irType :: builder.irType
         }
 
 
@@ -622,7 +612,20 @@ field getter (Codec codec) (RecordCodecBuilder builder) =
 -}
 endRecord : RecordCodecBuilder a a -> Codec a
 endRecord (RecordCodecBuilder builder) =
-    Codec builder
+    Codec
+        { fromInput =
+            \input ->
+                Product (List.reverse (builder.fromInput input))
+        , toOutput =
+            \ir ->
+                case ir of
+                    Product fields ->
+                        builder.toOutput (List.reverse fields)
+
+                    _ ->
+                        Err ""
+        , irType = ProductType (List.reverse builder.irType)
+        }
 
 
 {-| TODO
