@@ -13,7 +13,7 @@ module Gadget exposing
 {-| This module is for application developers who want to create Gadgets and use
 them with pre-existing adapters.
 
-If you want to develop your own adapters, see the [Gadget.IR](Gadget-IR) module.
+If you want to make your own adapters, see the [Gadget.IR](Gadget-IR) module.
 
 
 # Gadgets

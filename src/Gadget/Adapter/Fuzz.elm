@@ -1,4 +1,54 @@
-module Gadget.Adapter.Fuzz exposing (Override, fuzzer, fuzzerWithOverrides, override)
+module Gadget.Adapter.Fuzz exposing
+    ( fuzzer
+    , fuzzerWithOverrides, Override, override
+    )
+
+{-| Generate fuzzers for any Elm type.
+
+
+# Simple fuzzers
+
+    import Gadget
+    import Gadget.Adapter.Fuzz
+    import Fuzz
+
+    gadget =
+        Gadget.int
+
+    fuzzer =
+        Gadget.Adapter.Fuzz.fuzzer gadget
+
+    fuzzer --: Fuzz.Fuzzer Int
+
+    Fuzz.examples 1 fuzzer
+
+    --> [ 105 ]
+
+@docs fuzzer
+
+
+# Overriding fuzzers
+
+    import Gadget
+    import Gadget.Adapter.Fuzz
+    import Fuzz
+
+    gadget =
+        Gadget.int
+            |> Gadget.label "override-me"
+
+    fuzzer =
+        Gadget.Adapter.Fuzz.fuzzerWithOverrides
+            [ Gadget.Adapter.Fuzz.override "override-me" Gadget.int (Fuzz.constant 3) ]
+            gadget
+
+    Fuzz.examples 1 fuzzer
+
+    --> [ 3 ]
+
+@docs fuzzerWithOverrides, Override, override
+
+-}
 
 import Dict
 import Fuzz
@@ -6,11 +56,15 @@ import Gadget.IR as IR
 import Set
 
 
+{-| TODO
+-}
 fuzzer : IR.Gadget a -> Fuzz.Fuzzer a
 fuzzer codec =
     fuzzerWithOverrides [] codec
 
 
+{-| TODO
+-}
 fuzzerWithOverrides : List Override -> IR.Gadget a -> Fuzz.Fuzzer a
 fuzzerWithOverrides overrides codec =
     let
@@ -32,10 +86,14 @@ fuzzerWithOverrides overrides codec =
             )
 
 
+{-| TODO
+-}
 type Override
     = Override String (Fuzz.Fuzzer IR.IR)
 
 
+{-| TODO
+-}
 override : String -> IR.Gadget a -> Fuzz.Fuzzer a -> Override
 override label codec inputFuzzer =
     Override label (Fuzz.map (IR.fromInput codec) inputFuzzer)

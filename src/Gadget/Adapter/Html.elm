@@ -1,4 +1,10 @@
-module Gadget.Adapter.Html exposing (..)
+module Gadget.Adapter.Html exposing (view)
+
+{-|
+
+@docs view
+
+-}
 
 import Gadget.IR as IR
 import Html as H
@@ -6,6 +12,8 @@ import Html.Attributes as HA
 import Set
 
 
+{-| TODO
+-}
 view : IR.Gadget a -> a -> H.Html msg
 view codec value =
     IR.fromInput codec value

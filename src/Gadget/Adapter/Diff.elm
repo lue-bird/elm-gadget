@@ -1,4 +1,32 @@
-module Gadget.Adapter.Diff exposing (..)
+module Gadget.Adapter.Diff exposing (Changes, diff, patch)
+
+{-| Generate and use (fairly) efficient diffs between two values of any Elm
+type.
+
+    import Gadget
+    import Gadget.Adapter.Diff
+
+    gadget =
+        Gadget.list Gadget.int
+
+    oldValue =
+        [ 1, 2, 3 ]
+
+    newValue =
+        [ 1, 2, 3, 4 ]
+
+    changes =
+        Gadget.Adapter.Diff.diff gadget oldValue newValue
+
+    changes --: Gadget.Adapter.Diff.Changes
+
+    Gadget.Adapter.Diff.patch gadget changes oldValue
+
+    --> Ok [ 1, 2, 3, 4 ]
+
+@docs Changes, diff, patch
+
+-}
 
 import Dict
 import Diff as ListDiffer
@@ -8,10 +36,12 @@ import Maybe.Extra
 import Result.Extra
 
 
-type Diff
+{-| A set of changes that captures the differences between two Elm values.
+-}
+type Changes
     = Identical
-    | ProductChanges ( Int, Diff ) (List ( Int, Diff ))
-    | CustomChanges Int (List ( Int, Diff ))
+    | ProductChanges ( Int, Changes ) (List ( Int, Changes ))
+    | CustomChanges Int (List ( Int, Changes ))
     | BoolChange Bool
     | IntChange Int
     | FloatChange Float
@@ -21,15 +51,17 @@ type Diff
 
 
 type ListChange
-    = Added Diff
+    = Added Changes
     | Moved Int
-    | Updated Int Diff
+    | Updated Int Changes
     | RangeForward Int Int
     | RangeBackward Int Int
     | Repeat Int ListChange
 
 
-diff : IR.Gadget a -> a -> a -> Diff
+{-| Compare two values and generate [Changes](#Changes).
+-}
+diff : IR.Gadget a -> a -> a -> Changes
 diff codec old new =
     let
         oldIR =
@@ -44,7 +76,7 @@ diff codec old new =
     diffHelp irType oldIR newIR
 
 
-diffHelp : IR.IRType -> IR.IR -> IR.IR -> Diff
+diffHelp : IR.IRType -> IR.IR -> IR.IR -> Changes
 diffHelp irType_ oldIR_ newIR_ =
     if oldIR_ == newIR_ then
         Identical
@@ -286,7 +318,7 @@ doRunLengthEncoding list =
         list
 
 
-areSimilar : IR.IRType -> IR.IR -> IR.IR -> Maybe Diff
+areSimilar : IR.IRType -> IR.IR -> IR.IR -> Maybe Changes
 areSimilar irType old new =
     let
         oldNewDiff =
@@ -302,7 +334,7 @@ areSimilar irType old new =
         Nothing
 
 
-size : Diff -> Int
+size : Changes -> Int
 size changes =
     case changes of
         Identical ->
@@ -407,7 +439,9 @@ default irType =
             IR.Product (List.map default fieldTypes)
 
 
-patch : IR.Gadget a -> Diff -> a -> Result String a
+{-| Use a set of [Changes](#Changes) to patch a value.
+-}
+patch : IR.Gadget a -> Changes -> a -> Result String a
 patch codec delta old =
     let
         oldIR =
@@ -425,7 +459,7 @@ patch codec delta old =
             Err e
 
 
-patchHelp : Diff -> IR.IR -> IR.IRType -> Result String IR.IR
+patchHelp : Changes -> IR.IR -> IR.IRType -> Result String IR.IR
 patchHelp changes_ old_ irType_ =
     case ( changes_, old_, irType_ ) of
         ( Identical, _, _ ) ->

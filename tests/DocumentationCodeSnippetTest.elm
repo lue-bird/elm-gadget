@@ -6,6 +6,7 @@ module DocumentationCodeSnippetTest exposing (tests)
 import Expect
 import Fuzz
 import Gadget
+import Gadget.Adapter.Diff
 import Gadget.Adapter.Fuzz
 import Gadget.Adapter.Json
 import Json.Decode
@@ -44,6 +45,72 @@ tests =
                     )
                 ]
             ]
+        , Test.describe
+            "Gadget.Adapter.Diff"
+            [ Test.describe
+                "module header"
+                [ Test.describe
+                    "code snippet 0"
+                    [ Test.test
+                        "0"
+                        (\() ->
+                            let
+                                unused : Gadget.Adapter.Diff.Changes
+                                unused =
+                                    changes__Gadget_Adapter_Diff__Header_0
+                            in
+                            Expect.pass
+                        )
+                    , Test.test
+                        "1"
+                        (\() ->
+                            Gadget.Adapter.Diff.patch
+                                gadget__Gadget_Adapter_Diff__Header_0
+                                changes__Gadget_Adapter_Diff__Header_0
+                                oldValue__Gadget_Adapter_Diff__Header_0
+                                |> Expect.equal (Result.Ok [ 1, 2, 3, 4 ])
+                        )
+                    ]
+                ]
+            ]
+        , Test.describe
+            "Gadget.Adapter.Fuzz"
+            [ Test.describe
+                "module header"
+                [ Test.describe
+                    "code snippet 0"
+                    [ Test.test
+                        "0"
+                        (\() ->
+                            let
+                                unused : Fuzz.Fuzzer Basics.Int
+                                unused =
+                                    fuzzer__Gadget_Adapter_Fuzz__Header_0
+                            in
+                            Expect.pass
+                        )
+                    , Test.test
+                        "1"
+                        (\() ->
+                            Fuzz.examples
+                                1
+                                fuzzer__Gadget_Adapter_Fuzz__Header_0
+                                |> Expect.equal [ 105 ]
+                        )
+                    ]
+                , Test.describe
+                    "code snippet 1"
+                    [ Test.test
+                        "0"
+                        (\() ->
+                            Fuzz.examples
+                                1
+                                fuzzer__Gadget_Adapter_Fuzz__Header_1
+                                |> Expect.equal [ 3 ]
+                        )
+                    ]
+                ]
+            ]
         ]
 
 
@@ -75,3 +142,44 @@ decoded__Readme_0 =
 
 fuzzed__Readme_0 =
     Fuzz.examples 1 (Gadget.Adapter.Fuzz.fuzzer gadget__Readme_0)
+
+
+gadget__Gadget_Adapter_Diff__Header_0 =
+    Gadget.list Gadget.int
+
+
+oldValue__Gadget_Adapter_Diff__Header_0 =
+    [ 1, 2, 3 ]
+
+
+newValue__Gadget_Adapter_Diff__Header_0 =
+    [ 1, 2, 3, 4 ]
+
+
+changes__Gadget_Adapter_Diff__Header_0 =
+    Gadget.Adapter.Diff.diff
+        gadget__Gadget_Adapter_Diff__Header_0
+        oldValue__Gadget_Adapter_Diff__Header_0
+        newValue__Gadget_Adapter_Diff__Header_0
+
+
+gadget__Gadget_Adapter_Fuzz__Header_0 =
+    Gadget.int
+
+
+fuzzer__Gadget_Adapter_Fuzz__Header_0 =
+    Gadget.Adapter.Fuzz.fuzzer gadget__Gadget_Adapter_Fuzz__Header_0
+
+
+gadget__Gadget_Adapter_Fuzz__Header_1 =
+    Gadget.int |> Gadget.label "override-me"
+
+
+fuzzer__Gadget_Adapter_Fuzz__Header_1 =
+    Gadget.Adapter.Fuzz.fuzzerWithOverrides
+        [ Gadget.Adapter.Fuzz.override
+            "override-me"
+            Gadget.int
+            (Fuzz.constant 3)
+        ]
+        gadget__Gadget_Adapter_Fuzz__Header_1

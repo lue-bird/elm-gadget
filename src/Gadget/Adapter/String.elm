@@ -1,10 +1,18 @@
-module Gadget.Adapter.String exposing (parser, print)
+module Gadget.Adapter.String exposing (print, parser)
+
+{-|
+
+@docs print, parser
+
+-}
 
 import Gadget.IR as IR
 import Parser as P exposing ((|.), (|=), Parser)
 import Set
 
 
+{-| TODO
+-}
 print : IR.Gadget a -> a -> String
 print codec value =
     IR.fromInput codec value
@@ -106,6 +114,8 @@ printAdapter irValue =
                 items
 
 
+{-| TODO
+-}
 parser : IR.Gadget a -> Parser a
 parser codec =
     irParser

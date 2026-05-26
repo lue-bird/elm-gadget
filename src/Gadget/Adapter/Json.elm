@@ -1,4 +1,10 @@
-module Gadget.Adapter.Json exposing (..)
+module Gadget.Adapter.Json exposing (encode, decoder)
+
+{-|
+
+@docs encode, decoder
+
+-}
 
 import Gadget.IR as IR
 import Json.Decode as JD
@@ -6,6 +12,8 @@ import Json.Encode as JE
 import Set
 
 
+{-| TODO
+-}
 encode : IR.Gadget a -> a -> JE.Value
 encode codec value =
     value
@@ -13,6 +21,8 @@ encode codec value =
         |> encodeAdapter
 
 
+{-| TODO
+-}
 decoder : IR.Gadget a -> JD.Decoder a
 decoder codec =
     decodeAdapter

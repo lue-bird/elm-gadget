@@ -1,4 +1,10 @@
-module Gadget.Adapter.Random exposing (Override, generator, generatorWithOverrides, override)
+module Gadget.Adapter.Random exposing (generator, generatorWithOverrides, Override, override)
+
+{-|
+
+@docs generator, generatorWithOverrides, Override, override
+
+-}
 
 import Dict
 import Gadget.IR as IR
@@ -11,20 +17,28 @@ import Random.String
 import Set
 
 
+{-| TODO
+-}
 type Override
     = Override String (Random.Generator IR.IR)
 
 
+{-| TODO
+-}
 override : String -> IR.Gadget a -> Random.Generator a -> Override
 override label codec inputGenerator =
     Override label (Random.map (IR.fromInput codec) inputGenerator)
 
 
+{-| TODO
+-}
 generator : IR.Gadget a -> Random.Generator a
 generator codec =
     generatorWithOverrides [] codec
 
 
+{-| TODO
+-}
 generatorWithOverrides : List Override -> IR.Gadget a -> Random.Generator a
 generatorWithOverrides overrides codec =
     let
