@@ -5,14 +5,15 @@ module Gadget exposing
     , tuple, triple
     , RecordGadgetBuilder, record, field, endRecord
     , maybe, result
-    , CustomGadgetBuilder, custom
-    , variant0, variant1, variant2, variant3, variant4, variant5
-    , endCustom
+    , CustomGadgetBuilder, custom, variant0, variant1, variant2, variant3, variant4, variant5, endCustom
     , map
     , label
     )
 
-{-|
+{-| This module is for application developers who want to create Gadgets and use
+them with pre-existing adapters.
+
+If you want to develop your own adapters, see the [Gadget.IR](Gadget-IR) module.
 
 
 # Gadgets
@@ -36,15 +37,15 @@ module Gadget exposing
 ## Product types
 
 @docs tuple, triple
+
 @docs RecordGadgetBuilder, record, field, endRecord
 
 
 ## Custom types
 
 @docs maybe, result
-@docs CustomGadgetBuilder, custom
-@docs variant0, variant1, variant2, variant3, variant4, variant5
-@docs endCustom
+
+@docs CustomGadgetBuilder, custom, variant0, variant1, variant2, variant3, variant4, variant5, endCustom
 
 
 # Transforming input and output
