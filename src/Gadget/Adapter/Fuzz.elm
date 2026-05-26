@@ -1,4 +1,4 @@
-module Gadget.Fuzz exposing (Override, fuzzer, fuzzerWithOverrides, override)
+module Gadget.Adapter.Fuzz exposing (Override, fuzzer, fuzzerWithOverrides, override)
 
 import Dict
 import Fuzz

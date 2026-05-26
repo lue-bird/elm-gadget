@@ -1,4 +1,4 @@
-module Gadget.Html exposing (..)
+module Gadget.Adapter.Html exposing (..)
 
 import Gadget.IR as IR
 import Html as H

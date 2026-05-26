@@ -6,8 +6,8 @@ module DocumentationCodeSnippetTest exposing (tests)
 import Expect
 import Fuzz
 import Gadget
-import Gadget.Fuzz
-import Gadget.Json
+import Gadget.Adapter.Fuzz
+import Gadget.Adapter.Json
 import Json.Decode
 import Test
 
@@ -64,14 +64,14 @@ gadget__Readme_0 =
 
 
 json__Readme_0 =
-    Gadget.Json.encode gadget__Readme_0 input__Readme_0
+    Gadget.Adapter.Json.encode gadget__Readme_0 input__Readme_0
 
 
 decoded__Readme_0 =
     Json.Decode.decodeValue
-        (Gadget.Json.decoder gadget__Readme_0)
+        (Gadget.Adapter.Json.decoder gadget__Readme_0)
         json__Readme_0
 
 
 fuzzed__Readme_0 =
-    Fuzz.examples 1 (Gadget.Fuzz.fuzzer gadget__Readme_0)
+    Fuzz.examples 1 (Gadget.Adapter.Fuzz.fuzzer gadget__Readme_0)

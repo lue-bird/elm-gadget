@@ -1,4 +1,4 @@
-module Gadget.Random exposing (Override, generator, generatorWithOverrides, override)
+module Gadget.Adapter.Random exposing (Override, generator, generatorWithOverrides, override)
 
 import Dict
 import Gadget.IR as IR

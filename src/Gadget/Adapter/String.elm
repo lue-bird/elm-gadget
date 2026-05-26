@@ -1,4 +1,4 @@
-module Gadget.String exposing (parser, print)
+module Gadget.Adapter.String exposing (parser, print)
 
 import Gadget.IR as IR
 import Parser as P exposing ((|.), (|=), Parser)

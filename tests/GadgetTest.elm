@@ -3,7 +3,7 @@ module GadgetTest exposing (..)
 import Expect
 import Fuzz
 import Gadget
-import Gadget.Fuzz
+import Gadget.Adapter.Fuzz
 import Gadget.IR
 import Test exposing (..)
 import TestHelpers exposing (..)
@@ -24,8 +24,8 @@ irTests =
 roundTrip : Gadget.Gadget input -> String -> Test
 roundTrip codec name =
     fuzz
-        (Gadget.Fuzz.fuzzerWithOverrides
-            [ Gadget.Fuzz.override "fuzz-override" Gadget.string (Fuzz.stringOfLengthBetween 0 6)
+        (Gadget.Adapter.Fuzz.fuzzerWithOverrides
+            [ Gadget.Adapter.Fuzz.override "fuzz-override" Gadget.string (Fuzz.stringOfLengthBetween 0 6)
             ]
             codec
         )

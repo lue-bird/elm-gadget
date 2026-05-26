@@ -2,8 +2,8 @@ module Gadget.DiffTest exposing (..)
 
 import Expect
 import Gadget
-import Gadget.Diff
-import Gadget.Fuzz
+import Gadget.Adapter.Diff
+import Gadget.Adapter.Fuzz
 import Test exposing (..)
 import TestHelpers exposing (..)
 
@@ -23,14 +23,14 @@ diffTests =
 roundTrip : Gadget.Gadget b -> String -> Test
 roundTrip codec name =
     fuzz2
-        (Gadget.Fuzz.fuzzer codec)
-        (Gadget.Fuzz.fuzzer codec)
+        (Gadget.Adapter.Fuzz.fuzzer codec)
+        (Gadget.Adapter.Fuzz.fuzzer codec)
         (name ++ " diff -> patch roundtrip")
     <|
         \old new ->
             let
                 diff =
-                    Gadget.Diff.diff codec old new
+                    Gadget.Adapter.Diff.diff codec old new
             in
-            Gadget.Diff.patch codec diff old
+            Gadget.Adapter.Diff.patch codec diff old
                 |> Expect.equal (Ok new)

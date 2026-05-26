@@ -1,4 +1,4 @@
-module Gadget.Json exposing (..)
+module Gadget.Adapter.Json exposing (..)
 
 import Gadget.IR as IR
 import Json.Decode as JD

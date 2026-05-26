@@ -2,8 +2,8 @@ module Gadget.JsonTest exposing (..)
 
 import Expect
 import Gadget
-import Gadget.Fuzz
-import Gadget.Json
+import Gadget.Adapter.Fuzz
+import Gadget.Adapter.Json
 import Json.Decode
 import Test exposing (..)
 import TestHelpers exposing (..)
@@ -24,13 +24,13 @@ diffTests =
 roundTrip : Gadget.Gadget b -> String -> Test
 roundTrip codec name =
     fuzz
-        (Gadget.Fuzz.fuzzer codec)
+        (Gadget.Adapter.Fuzz.fuzzer codec)
         (name ++ " encode -> decode roundtrip")
     <|
         \value ->
             let
                 encoded =
-                    Gadget.Json.encode codec value
+                    Gadget.Adapter.Json.encode codec value
             in
-            Json.Decode.decodeValue (Gadget.Json.decoder codec) encoded
+            Json.Decode.decodeValue (Gadget.Adapter.Json.decoder codec) encoded
                 |> Expect.equal (Ok value)

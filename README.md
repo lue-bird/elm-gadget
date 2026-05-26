@@ -20,8 +20,8 @@ Do `npx run-pty run-pty.json` in the project root folder.
 
 ```elm
 import Gadget
-import Gadget.Fuzz
-import Gadget.Json
+import Gadget.Adapter.Fuzz
+import Gadget.Adapter.Json
 import Fuzz
 import Json.Decode 
 
@@ -52,12 +52,12 @@ gadget =
 -- from JSON. Here's a JSON adapter I made earlier:
 
 json = 
-    Gadget.Json.encode gadget input
+    Gadget.Adapter.Json.encode gadget input
 
 json --: Json.Decode.Value
 
 decoded = 
-    Json.Decode.decodeValue (Gadget.Json.decoder gadget) json
+    Json.Decode.decodeValue (Gadget.Adapter.Json.decoder gadget) json
 
 decoded --> Ok input
 
@@ -67,7 +67,7 @@ decoded --> Ok input
 -- can use it with any Gadget:
 
 fuzzed = 
-    Fuzz.examples 1 (Gadget.Fuzz.fuzzer gadget)
+    Fuzz.examples 1 (Gadget.Adapter.Fuzz.fuzzer gadget)
 
 fuzzed --> [ { age = 92, name = "o \n\\" } ]
 ```

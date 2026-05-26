@@ -1,12 +1,21 @@
 module Gadget.IR exposing
-    ( Gadget(..), Error, IR(..), IRType(..), Variant(..), VariantType(..)
+    ( Gadget(..), Error
     , fromInput, toOutput, irType
+    , IR(..), IRType(..), Variant(..), VariantType(..)
     )
 
-{-|
+{-| Tools for creating adapters for Gadgets
 
-@docs Gadget, Error, IR, IRType, Variant, VariantType
+
+# Working with Gadgets
+
+@docs Gadget, Error
 @docs fromInput, toOutput, irType
+
+
+# Working with IR
+
+@docs IR, IRType, Variant, VariantType
 
 -}
 

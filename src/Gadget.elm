@@ -15,37 +15,31 @@ module Gadget exposing
 {-|
 
 
-# elm-gadget
-
-
-## Gadgets
+# Gadgets
 
 @docs Gadget
 
 
-## Primitives
+# Primitives
 
 @docs bool, char, string, int, float
 
 
-## Combinators
+# Combinators
 
 
-### Common data types
-
-
-#### Collections
+## Collections
 
 @docs list, array, dict, set
 
 
-### Product types
+## Product types
 
 @docs tuple, triple
 @docs RecordGadgetBuilder, record, field, endRecord
 
 
-### Custom types
+## Custom types
 
 @docs maybe, result
 @docs CustomGadgetBuilder, custom
@@ -53,12 +47,12 @@ module Gadget exposing
 @docs endCustom
 
 
-### Transforming input and output
+# Transforming input and output
 
 @docs map
 
 
-### Labels
+# Labels
 
 @docs label
 

@@ -1,4 +1,4 @@
-module Gadget.Diff exposing (..)
+module Gadget.Adapter.Diff exposing (..)
 
 import Dict
 import Diff as ListDiffer

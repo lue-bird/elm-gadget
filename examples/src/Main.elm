@@ -3,12 +3,12 @@ module Main exposing (..)
 import Browser
 import Fuzz
 import Gadget
-import Gadget.Diff
-import Gadget.Fuzz
-import Gadget.Html
-import Gadget.Json
-import Gadget.Random
-import Gadget.String
+import Gadget.Adapter.Diff
+import Gadget.Adapter.Fuzz
+import Gadget.Adapter.Html
+import Gadget.Adapter.Json
+import Gadget.Adapter.Random
+import Gadget.Adapter.String
 import Html
 import Html.Attributes
 import Html.Events
@@ -109,29 +109,29 @@ view ( seed1, seed2 ) =
             personGadget
 
         fuzzOverrides =
-            [ Gadget.Fuzz.override "fuzz-name" Gadget.string (Fuzz.oneOf (List.map Fuzz.constant [ "Ed", "Mario", "Leonardo", "Jeroen" ]))
-            , Gadget.Fuzz.override "heightInCentimetres" Gadget.float (Fuzz.floatRange 160 196)
-            , Gadget.Fuzz.override "dogName" Gadget.string (Fuzz.oneOf (List.map Fuzz.constant [ "Fido", "Kevin", "Rover", "Fifi" ]))
-            , Gadget.Fuzz.override "series" Gadget.char (Fuzz.oneOf (List.range 65 90 |> List.map Char.fromCode |> List.map Fuzz.constant))
-            , Gadget.Fuzz.override "model" Gadget.int (Fuzz.oneOf (List.range 1 5 |> List.map (\n -> n * 1000) |> List.map Fuzz.constant))
+            [ Gadget.Adapter.Fuzz.override "fuzz-name" Gadget.string (Fuzz.oneOf (List.map Fuzz.constant [ "Ed", "Mario", "Leonardo", "Jeroen" ]))
+            , Gadget.Adapter.Fuzz.override "heightInCentimetres" Gadget.float (Fuzz.floatRange 160 196)
+            , Gadget.Adapter.Fuzz.override "dogName" Gadget.string (Fuzz.oneOf (List.map Fuzz.constant [ "Fido", "Kevin", "Rover", "Fifi" ]))
+            , Gadget.Adapter.Fuzz.override "series" Gadget.char (Fuzz.oneOf (List.range 65 90 |> List.map Char.fromCode |> List.map Fuzz.constant))
+            , Gadget.Adapter.Fuzz.override "model" Gadget.int (Fuzz.oneOf (List.range 1 5 |> List.map (\n -> n * 1000) |> List.map Fuzz.constant))
             ]
 
         fuzzer =
-            Gadget.Fuzz.fuzzerWithOverrides fuzzOverrides gadget
+            Gadget.Adapter.Fuzz.fuzzerWithOverrides fuzzOverrides gadget
 
         fuzzed =
             Fuzz.examples 1 fuzzer
 
         randomOverrides =
-            [ Gadget.Random.override "random-name" Gadget.string (Random.uniform "Bill" [ "George", "Sue" ])
-            , Gadget.Random.override "heightInCentimetres" Gadget.float (Random.float 160 196)
-            , Gadget.Random.override "dogName" Gadget.string (Random.uniform "Fido" [ "Kevin", "Rover", "Fifi" ])
-            , Gadget.Random.override "series" Gadget.char (Random.uniform 'A' (List.range 66 90 |> List.map Char.fromCode))
-            , Gadget.Random.override "model" Gadget.int (Random.uniform 1000 (List.range 2 5 |> List.map (\n -> n * 1000)))
+            [ Gadget.Adapter.Random.override "random-name" Gadget.string (Random.uniform "Bill" [ "George", "Sue" ])
+            , Gadget.Adapter.Random.override "heightInCentimetres" Gadget.float (Random.float 160 196)
+            , Gadget.Adapter.Random.override "dogName" Gadget.string (Random.uniform "Fido" [ "Kevin", "Rover", "Fifi" ])
+            , Gadget.Adapter.Random.override "series" Gadget.char (Random.uniform 'A' (List.range 66 90 |> List.map Char.fromCode))
+            , Gadget.Adapter.Random.override "model" Gadget.int (Random.uniform 1000 (List.range 2 5 |> List.map (\n -> n * 1000)))
             ]
 
         randomGenerator =
-            Gadget.Random.generatorWithOverrides randomOverrides gadget
+            Gadget.Adapter.Random.generatorWithOverrides randomOverrides gadget
 
         firstValue =
             Random.step randomGenerator (Random.initialSeed seed1)
@@ -142,22 +142,22 @@ view ( seed1, seed2 ) =
                 |> Tuple.first
 
         diff =
-            Gadget.Diff.diff gadget firstValue secondValue
+            Gadget.Adapter.Diff.diff gadget firstValue secondValue
 
         patched =
-            Gadget.Diff.patch gadget diff firstValue
+            Gadget.Adapter.Diff.patch gadget diff firstValue
 
         encoded =
-            JE.encode 2 (Gadget.Json.encode gadget firstValue)
+            JE.encode 2 (Gadget.Adapter.Json.encode gadget firstValue)
 
         decoded =
-            JD.decodeString (Gadget.Json.decoder gadget) encoded
+            JD.decodeString (Gadget.Adapter.Json.decoder gadget) encoded
 
         printed =
-            Gadget.String.print gadget firstValue
+            Gadget.Adapter.String.print gadget firstValue
 
         parsed =
-            Parser.run (Gadget.String.parser gadget) printed
+            Parser.run (Gadget.Adapter.String.parser gadget) printed
     in
     Html.div []
         [ Html.h1 [] [ Html.text "elm-gadget examples" ]
@@ -173,9 +173,9 @@ view ( seed1, seed2 ) =
         , head "Patched value equals second value?"
         , show (patched == Ok secondValue)
         , head "Html viewer (first value)"
-        , Gadget.Html.view gadget firstValue
+        , Gadget.Adapter.Html.view gadget firstValue
         , head "Html viewer (second value)"
-        , Gadget.Html.view gadget secondValue
+        , Gadget.Adapter.Html.view gadget secondValue
         , head "Printer (first value)"
         , Html.code [ Html.Attributes.class "withoutSpaces" ] [ Html.text printed ]
         , head "Parser (first value)"
