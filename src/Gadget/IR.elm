@@ -1,7 +1,7 @@
 module Gadget.IR exposing
     ( Gadget(..), Error
     , fromInput, toOutput, irType
-    , IR(..), IRType(..), Variant(..), VariantType(..)
+    , IR(..), Variant(..), IRType(..), VariantType(..)
     )
 
 {-| Tools for creating adapters for Gadgets
@@ -15,20 +15,15 @@ module Gadget.IR exposing
 
 # Working with IR
 
-@docs IR, IRType, Variant, VariantType
+@docs IR, Variant, IRType, VariantType
 
 -}
 
 import Set
 
 
-{-| TODO
--}
-type alias Error =
-    String
-
-
-{-| TODO
+{-| The core type of this package. Use the functions in this module together
+with an appropriate Gadget to convert values to and from the IR type.
 -}
 type Gadget a
     = Gadget
@@ -38,7 +33,14 @@ type Gadget a
         }
 
 
-{-| TODO
+{-| An error that may be generated if `toOutput` fails.
+-}
+type alias Error =
+    String
+
+
+{-| IR values are variants of this type. All Elm values (as long as they don't
+contain functions) should be able to be encoded as a value of this type.
 -}
 type IR
     = Bool Bool
@@ -52,7 +54,7 @@ type IR
     | Labelled (Set.Set String) IR
 
 
-{-| TODO
+{-| A type used by the `Custom` constructor of the IR type.
 -}
 type Variant
     = Variant0
@@ -63,7 +65,7 @@ type Variant
     | Variant5 IR IR IR IR IR
 
 
-{-| TODO
+{-| Any IR value will have a "type" that is a variant of IRType.
 -}
 type IRType
     = BoolType
@@ -77,7 +79,7 @@ type IRType
     | LabelledType (Set.Set String) IRType
 
 
-{-| TODO
+{-| A type used by the `Custom` constructor of the IRType type.
 -}
 type VariantType
     = Variant0Type
@@ -88,21 +90,22 @@ type VariantType
     | Variant5Type IRType IRType IRType IRType IRType
 
 
-{-| TODO
+{-| Use an appropriate Gadget to convert an Elm value into an IR value.
 -}
 fromInput : Gadget a -> a -> IR
 fromInput (Gadget c) input =
     c.fromInput input
 
 
-{-| TODO
+{-| Use an appropriate Gadget to extract the IRType of an Elm value.
 -}
 irType : Gadget a -> IRType
 irType (Gadget c) =
     c.irType
 
 
-{-| TODO
+{-| Use an appropriate Gadget to attempt to convert an IR value into an Elm
+value.
 -}
 toOutput : Gadget a -> IR -> Result Error a
 toOutput (Gadget c) a =

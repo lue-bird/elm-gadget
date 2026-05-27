@@ -3,8 +3,8 @@ module Gadget exposing
     , bool, char, string, int, float
     , list, array, dict, set
     , tuple, triple
-    , RecordGadgetBuilder, record, field, endRecord
     , maybe, result
+    , RecordGadgetBuilder, record, field, endRecord
     , CustomGadgetBuilder, custom, variant0, variant1, variant2, variant3, variant4, variant5, endCustom
     , map
     , label
@@ -28,32 +28,65 @@ If you want to make your own adapters, see the [Gadget.IR](Gadget-IR) module.
 
 # Combinators
 
-
-## Collections
-
 @docs list, array, dict, set
 
-
-## Product types
-
 @docs tuple, triple
+
+@docs maybe, result
+
+
+# Records
+
+    import Gadget
+
+    type alias Person =
+        { name : String
+        , age : Int
+        }
+
+    personGadget =
+        Gadget.record Person
+            |> Gadget.field .name Gadget.string
+            |> Gadget.field .age Gadget.int
+            |> Gadget.endRecord
+
+    personGadget --: Gadget.Gadget Person
 
 @docs RecordGadgetBuilder, record, field, endRecord
 
 
-## Custom types
+# Custom types
 
-@docs maybe, result
+    import Gadget
+
+    type Shape
+        = Rectangle Int Int
+        | Circle Int
+
+    shapeGadget =
+        Gadget.custom
+            (\rectangle circle variant ->
+                case variant of
+                    Rectangle width height ->
+                        rectangle width height
+                    Circle radius ->
+                        circle radius
+            )
+            |> Gadget.variant2 Rectangle Gadget.int Gadget.int
+            |> Gadget.variant1 Circle Gadget.int
+            |> Gadget.endCustom
+
+    shapeGadget --: Gadget.Gadget Shape
 
 @docs CustomGadgetBuilder, custom, variant0, variant1, variant2, variant3, variant4, variant5, endCustom
 
 
-# Transforming input and output
+# Transforming Gadgets
 
 @docs map
 
 
-# Labels
+# Labelling Gadgets
 
 @docs label
 
@@ -74,13 +107,14 @@ import Result.Extra
 import Set
 
 
-{-| TODO
+{-| The core type of this package. Use the primitives and combinators in this
+module to define Gadgets for the types in your application.
 -}
 type alias Gadget a =
     Gadget.IR.Gadget a
 
 
-{-| TODO
+{-| A type used to build Gadgets for records.
 -}
 type RecordGadgetBuilder input output
     = RecordGadgetBuilder
@@ -90,7 +124,7 @@ type RecordGadgetBuilder input output
         }
 
 
-{-| TODO
+{-| A type used to build Gadgets for custom types.
 -}
 type CustomGadgetBuilder input hasAtLeastOneVariant output
     = CustomGadgetBuilder
@@ -101,7 +135,7 @@ type CustomGadgetBuilder input hasAtLeastOneVariant output
         }
 
 
-{-| TODO
+{-| A Gadget for the `Bool` primitive type.
 -}
 bool : Gadget Bool
 bool =
@@ -119,7 +153,7 @@ bool =
         }
 
 
-{-| TODO
+{-| A Gadget for the `Char` primitive type.
 -}
 char : Gadget Char
 char =
@@ -137,7 +171,7 @@ char =
         }
 
 
-{-| TODO
+{-| A Gadget for the `String` primitive type.
 -}
 string : Gadget String
 string =
@@ -155,7 +189,7 @@ string =
         }
 
 
-{-| TODO
+{-| A Gadget for the `Int` primitive type.
 -}
 int : Gadget Int
 int =
@@ -173,7 +207,7 @@ int =
         }
 
 
-{-| TODO
+{-| A Gadget for the `Float` primitive type.
 -}
 float : Gadget Float
 float =
@@ -191,7 +225,15 @@ float =
         }
 
 
-{-| TODO
+{-| A combinator used to define Gadgets for lists.
+
+    import Gadget
+
+    listGadget =
+        Gadget.list Gadget.int
+
+    listGadget --: Gadget.Gadget (List Int)
+
 -}
 list : Gadget a -> Gadget (List a)
 list (Gadget item) =
@@ -210,7 +252,16 @@ list (Gadget item) =
         }
 
 
-{-| TODO
+{-| A combinator used to define Gadgets for dictionaries.
+
+    import Gadget
+    import Dict
+
+    dictGadget =
+        Gadget.dict Gadget.int Gadget.string
+
+    dictGadget --: Gadget.Gadget (Dict.Dict Int String)
+
 -}
 dict :
     Gadget comparable
@@ -221,7 +272,16 @@ dict key value =
         |> map Dict.fromList Dict.toList
 
 
-{-| TODO
+{-| A combinator used to define Gadgets for sets.
+
+    import Gadget
+    import Set
+
+    dictGadget =
+        Gadget.set Gadget.int
+
+    dictGadget --: Gadget.Gadget (Set.Set Int)
+
 -}
 set :
     Gadget comparable
@@ -231,7 +291,16 @@ set value =
         |> map Set.fromList Set.toList
 
 
-{-| TODO
+{-| A combinator used to define Gadgets for arrays.
+
+    import Gadget
+    import Array
+
+    arrayGadget =
+        Gadget.array Gadget.int
+
+    arrayGadget --: Gadget.Gadget (Array.Array Int)
+
 -}
 array : Gadget a -> Gadget (Array.Array a)
 array item =
@@ -239,7 +308,15 @@ array item =
         |> map Array.fromList Array.toList
 
 
-{-| TODO
+{-| A combinator used to define Gadgets for the Maybe type.
+
+    import Gadget
+
+    maybeGadget =
+        Gadget.maybe Gadget.int
+
+    maybeGadget --: Gadget.Gadget (Maybe Int)
+
 -}
 maybe : Gadget a -> Gadget (Maybe a)
 maybe item =
@@ -257,7 +334,15 @@ maybe item =
         |> endCustom
 
 
-{-| TODO
+{-| A combinator used to define Gadgets for the Result type.
+
+    import Gadget
+
+    resultGadget =
+        Gadget.result Gadget.string Gadget.int
+
+    resultGadget --: Gadget.Gadget (Result String Int)
+
 -}
 result : Gadget x -> Gadget a -> Gadget (Result x a)
 result x a =
@@ -275,7 +360,15 @@ result x a =
         |> endCustom
 
 
-{-| TODO
+{-| A combinator used to define Gadgets for tuples.
+
+    import Gadget
+
+    tupleGadget =
+        Gadget.tuple Gadget.string Gadget.int
+
+    tupleGadget --: Gadget.Gadget ( String, Int )
+
 -}
 tuple : Gadget a -> Gadget b -> Gadget ( a, b )
 tuple a b =
@@ -285,7 +378,15 @@ tuple a b =
         |> endRecord
 
 
-{-| TODO
+{-| A combinator used to define Gadgets for triples.
+
+    import Gadget
+
+    tripleGadget =
+        Gadget.triple Gadget.string Gadget.int Gadget.float
+
+    tripleGadget --: Gadget.Gadget ( String, Int, Float )
+
 -}
 triple : Gadget a -> Gadget b -> Gadget c -> Gadget ( a, b, c )
 triple a b c =
@@ -296,7 +397,7 @@ triple a b c =
         |> endRecord
 
 
-{-| TODO
+{-| Start the definition of a custom type.
 -}
 custom : input -> CustomGadgetBuilder input Never output
 custom match =
@@ -308,7 +409,7 @@ custom match =
         }
 
 
-{-| TODO
+{-| Add a variant with zero arguments to the definition of a custom type.
 -}
 variant0 :
     output
@@ -336,7 +437,7 @@ variant0 ctor (CustomGadgetBuilder prev) =
         }
 
 
-{-| TODO
+{-| Add a variant with one argument to the definition of a custom type.
 -}
 variant1 :
     (arg1 -> output)
@@ -365,7 +466,7 @@ variant1 ctor (Gadget argfns) (CustomGadgetBuilder prev) =
         }
 
 
-{-| TODO
+{-| Add a variant with two arguments to the definition of a custom type.
 -}
 variant2 :
     (arg1 -> arg2 -> output)
@@ -395,7 +496,7 @@ variant2 ctor (Gadget arg1fns) (Gadget arg2fns) (CustomGadgetBuilder prev) =
         }
 
 
-{-| TODO
+{-| Add a variant with three arguments to the definition of a custom type.
 -}
 variant3 :
     (arg1 -> arg2 -> arg3 -> output)
@@ -440,7 +541,7 @@ variant3 ctor (Gadget arg1fns) (Gadget arg2fns) (Gadget arg3fns) (CustomGadgetBu
         }
 
 
-{-| TODO
+{-| Add a variant with four arguments to the definition of a custom type.
 -}
 variant4 :
     (arg1 -> arg2 -> arg3 -> arg4 -> output)
@@ -489,7 +590,7 @@ variant4 ctor (Gadget arg1fns) (Gadget arg2fns) (Gadget arg3fns) (Gadget arg4fns
         }
 
 
-{-| TODO
+{-| Add a variant with five arguments to the definition of a custom type.
 -}
 variant5 :
     (arg1 -> arg2 -> arg3 -> arg4 -> arg5 -> output)
@@ -542,7 +643,7 @@ variant5 ctor (Gadget arg1fns) (Gadget arg2fns) (Gadget arg3fns) (Gadget arg4fns
         }
 
 
-{-| TODO
+{-| Complete the definition of a custom type.
 -}
 endCustom : CustomGadgetBuilder (a -> IR) () a -> Gadget a
 endCustom (CustomGadgetBuilder prev) =
@@ -565,7 +666,7 @@ endCustom (CustomGadgetBuilder prev) =
         }
 
 
-{-| TODO
+{-| Start the definition of a record.
 -}
 record : output -> RecordGadgetBuilder input output
 record ctor =
@@ -576,7 +677,7 @@ record ctor =
         }
 
 
-{-| TODO
+{-| Add a field to the definition of a record.
 -}
 field :
     (input -> field)
@@ -610,7 +711,7 @@ field getter (Gadget gadget) (RecordGadgetBuilder builder) =
         }
 
 
-{-| TODO
+{-| Complete the definition of a record.
 -}
 endRecord : RecordGadgetBuilder a a -> Gadget a
 endRecord (RecordGadgetBuilder builder) =
@@ -630,7 +731,18 @@ endRecord (RecordGadgetBuilder builder) =
         }
 
 
-{-| TODO
+{-| Convert a Gadget of one type to a Gadget of another type.
+
+    import Gadget
+
+    charListGadget =
+        Gadget.string
+            |> Gadget.map
+                String.toList
+                String.fromList
+
+    charListGadget --: Gadget.Gadget (List Char)
+
 -}
 map :
     (a -> b)
@@ -645,7 +757,16 @@ map aToB bToA (Gadget prev) =
         }
 
 
-{-| TODO
+{-| Add a label to a Gadget.
+
+    import Gadget
+
+    labelled =
+        Gadget.int
+            |> Gadget.label "age"
+
+    labelled --: Gadget.Gadget Int
+
 -}
 label : String -> Gadget a -> Gadget a
 label label_ (Gadget c) =
