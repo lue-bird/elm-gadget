@@ -1,6 +1,14 @@
 module Gadget.Adapter.String exposing (print, parser)
 
-{-|
+{-| **Warning:** the functions in this module may not do what you expect!
+
+This is not a full-blown parser and pretty-printer for Elm values. It just
+converts between Elm values and a simple and fairly compact String
+representation.
+
+If anyone would like to contribute an example of a proper parser/pretty-printer,
+I would be happy to add it to this package. I think it is probably possible with
+judicious (ab)use of Gadget.label.
 
 @docs print, parser
 
@@ -11,7 +19,19 @@ import Parser as P exposing ((|.), (|=), Parser)
 import Set
 
 
-{-| TODO
+{-| Convert an Elm value into a String.
+
+    import Gadget
+    import Gadget.Adapter.String
+
+    printer =
+        Gadget.Adapter.String.print (Gadget.list Gadget.int)
+
+    printed =
+        printer [ 1, 2, 3 ]
+
+    printed --> "l[i(1),i(2),i(3)]"
+
 -}
 print : IR.Gadget a -> a -> String
 print codec value =
@@ -114,7 +134,19 @@ printAdapter irValue =
                 items
 
 
-{-| TODO
+{-| Create a Parser that will attempt to convert a String created by `print`
+into an Elm value.
+
+    import Gadget
+    import Gadget.Adapter.String
+    import Parser -- from `elm/parser`
+
+    parser = Gadget.Adapter.String.parser (Gadget.list Gadget.int)
+
+    parsed = Parser.run parser "l[i(1),i(2),i(3)]"
+
+    parsed --> Ok [ 1, 2, 3 ]
+
 -}
 parser : IR.Gadget a -> Parser a
 parser codec =

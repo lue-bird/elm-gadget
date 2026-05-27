@@ -1,6 +1,7 @@
 module Gadget.Adapter.Random exposing (generator, generatorWithOverrides, Override, override)
 
-{-|
+{-| Use a Gadget to create a `Random.Generator` for use with functions from the
+`elm/random` package.
 
 @docs generator, generatorWithOverrides, Override, override
 
@@ -17,27 +18,92 @@ import Random.String
 import Set
 
 
-{-| TODO
--}
-type Override
-    = Override String (Random.Generator IR.IR)
+{-| Turn a Gadget into a `Random.Generator`.
 
+    import Gadget
+    import Gadget.Adapter.Random
+    import Random -- `elm/random`
 
-{-| TODO
--}
-override : String -> IR.Gadget a -> Random.Generator a -> Override
-override label codec inputGenerator =
-    Override label (Random.map (IR.fromInput codec) inputGenerator)
+    type alias Person =
+        { name : String
+        , age : Int
+        }
 
+    personGadget =
+        Gadget.record Person
+            |> Gadget.field .name Gadget.string
+            |> Gadget.field .age Gadget.int
+            |> Gadget.endRecord
 
-{-| TODO
+    personGenerator =
+        Gadget.Adapter.Random.generator personGadget
+
+    randomPerson =
+        Random.step
+            personGenerator
+            (Random.initialSeed 2)
+            |> Tuple.first
+
+    randomPerson --> { age = -1353461051, name = "" }
+
 -}
 generator : IR.Gadget a -> Random.Generator a
 generator codec =
     generatorWithOverrides [] codec
 
 
-{-| TODO
+{-| A type used to represent overrides.
+-}
+type Override
+    = Override String (Random.Generator IR.IR)
+
+
+{-| Override the default implementation of a `Random.Generator`.
+-}
+override : String -> IR.Gadget a -> Random.Generator a -> Override
+override label codec inputGenerator =
+    Override label (Random.map (IR.fromInput codec) inputGenerator)
+
+
+{-| Turn a Gadget into a `Random.Generator`, but override some of the default
+implementations of generators as defined by this module.
+
+    import Gadget
+    import Gadget.Adapter.Random
+    import Random -- `elm/random`
+
+    type alias Person =
+        { name : String
+        , age : Int
+        }
+
+    personGadget =
+        Gadget.record Person
+            |> Gadget.field .name nameGadget
+            |> Gadget.field .age Gadget.int
+            |> Gadget.endRecord
+
+    nameGadget =
+        Gadget.string
+            |> Gadget.label "name"
+
+    personGenerator =
+        Gadget.Adapter.Random.generatorWithOverrides
+            [ Gadget.Adapter.Random.override
+                "name"
+                Gadget.string
+                (Random.constant "Ed")
+            ]
+            personGadget
+
+    randomPerson =
+        Random.step
+            personGenerator
+            (Random.initialSeed 2)
+            |> Tuple.first
+
+    randomPerson --> { age = -97690584, name = "Ed" }
+
 -}
 generatorWithOverrides : List Override -> IR.Gadget a -> Random.Generator a
 generatorWithOverrides overrides codec =

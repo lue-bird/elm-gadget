@@ -11,7 +11,11 @@ import Gadget
 import Gadget.Adapter.Diff
 import Gadget.Adapter.Fuzz
 import Gadget.Adapter.Json
+import Gadget.Adapter.Random
+import Gadget.Adapter.String
 import Json.Decode
+import Parser
+import Random
 import Set
 import Test
 
@@ -306,6 +310,60 @@ tests =
                     ]
                 ]
             ]
+        , Test.describe
+            "Gadget.Adapter.Random"
+            [ Test.describe
+                "generator"
+                [ Test.describe
+                    "code snippet 0"
+                    [ Test.test
+                        "0"
+                        (\() ->
+                            randomPerson__Gadget_Adapter_Random__generator_0
+                                |> Expect.equal { age = -1353461051, name = "" }
+                        )
+                    ]
+                ]
+            , Test.describe
+                "generatorWithOverrides"
+                [ Test.describe
+                    "code snippet 0"
+                    [ Test.test
+                        "0"
+                        (\() ->
+                            randomPerson__Gadget_Adapter_Random__generatorWithOverrides_0
+                                |> Expect.equal { age = -97690584, name = "Ed" }
+                        )
+                    ]
+                ]
+            ]
+        , Test.describe
+            "Gadget.Adapter.String"
+            [ Test.describe
+                "parser"
+                [ Test.describe
+                    "code snippet 0"
+                    [ Test.test
+                        "0"
+                        (\() ->
+                            parsed__Gadget_Adapter_String__parser_0
+                                |> Expect.equal (Result.Ok [ 1, 2, 3 ])
+                        )
+                    ]
+                ]
+            , Test.describe
+                "print"
+                [ Test.describe
+                    "code snippet 0"
+                    [ Test.test
+                        "0"
+                        (\() ->
+                            printed__Gadget_Adapter_String__print_0
+                                |> Expect.equal "l[i(1),i(2),i(3)]"
+                        )
+                    ]
+                ]
+            ]
         ]
 
 
@@ -449,3 +507,76 @@ fuzzer__Gadget_Adapter_Fuzz__Header_1 =
             (Fuzz.constant 3)
         ]
         gadget__Gadget_Adapter_Fuzz__Header_1
+
+
+type alias Person__Gadget_Adapter_Random__generator_0 =
+    { name : String.String, age : Basics.Int }
+
+
+personGadget__Gadget_Adapter_Random__generator_0 =
+    Gadget.record Person__Gadget_Adapter_Random__generator_0
+        |> Gadget.field .name Gadget.string
+        |> Gadget.field .age Gadget.int
+        |> Gadget.endRecord
+
+
+personGenerator__Gadget_Adapter_Random__generator_0 =
+    Gadget.Adapter.Random.generator
+        personGadget__Gadget_Adapter_Random__generator_0
+
+
+randomPerson__Gadget_Adapter_Random__generator_0 =
+    Random.step
+        personGenerator__Gadget_Adapter_Random__generator_0
+        (Random.initialSeed 2)
+        |> Tuple.first
+
+
+type alias Person__Gadget_Adapter_Random__generatorWithOverrides_0 =
+    { name : String.String, age : Basics.Int }
+
+
+personGadget__Gadget_Adapter_Random__generatorWithOverrides_0 =
+    Gadget.record Person__Gadget_Adapter_Random__generatorWithOverrides_0
+        |> Gadget.field
+            .name
+            nameGadget__Gadget_Adapter_Random__generatorWithOverrides_0
+        |> Gadget.field .age Gadget.int
+        |> Gadget.endRecord
+
+
+nameGadget__Gadget_Adapter_Random__generatorWithOverrides_0 =
+    Gadget.string |> Gadget.label "name"
+
+
+personGenerator__Gadget_Adapter_Random__generatorWithOverrides_0 =
+    Gadget.Adapter.Random.generatorWithOverrides
+        [ Gadget.Adapter.Random.override
+            "name"
+            Gadget.string
+            (Random.constant "Ed")
+        ]
+        personGadget__Gadget_Adapter_Random__generatorWithOverrides_0
+
+
+randomPerson__Gadget_Adapter_Random__generatorWithOverrides_0 =
+    Random.step
+        personGenerator__Gadget_Adapter_Random__generatorWithOverrides_0
+        (Random.initialSeed 2)
+        |> Tuple.first
+
+
+parser__Gadget_Adapter_String__parser_0 =
+    Gadget.Adapter.String.parser (Gadget.list Gadget.int)
+
+
+parsed__Gadget_Adapter_String__parser_0 =
+    Parser.run parser__Gadget_Adapter_String__parser_0 "l[i(1),i(2),i(3)]"
+
+
+printer__Gadget_Adapter_String__print_0 =
+    Gadget.Adapter.String.print (Gadget.list Gadget.int)
+
+
+printed__Gadget_Adapter_String__print_0 =
+    printer__Gadget_Adapter_String__print_0 [ 1, 2, 3 ]
