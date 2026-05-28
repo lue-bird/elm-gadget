@@ -1,7 +1,7 @@
 module Gadget.IR exposing
-    ( Gadget(..), toOutput, irType
+    ( Gadget(..)
+    , fromInput, irType, toOutput, Error
     , IR(..), Variant(..), IRType(..), VariantType(..)
-    , Error, fromInput
     )
 
 {-| Tools for creating adapters for Gadgets.
@@ -13,7 +13,9 @@ various `Gadget.Adapter` modules in this package:
   - For a bidirectional example, try `Gadget.Adapter.Json`.
   - For an example of how to override Gadgets, see `Gadget.Adapter.Fuzz`.
 
-@docs Gadget, Error @docs fromInput, toOutput, irType
+@docs Gadget
+
+@docs fromInput, irType, toOutput, Error
 
 @docs IR, Variant, IRType, VariantType
 
@@ -23,7 +25,7 @@ import Set
 
 
 {-| The core type of this package. Use the functions in this module together
-with an appropriate Gadget to convert values to and from the IR type.
+with an appropriate Gadget to convert values to and from the `IR` type.
 -}
 type Gadget a
     = Gadget
@@ -39,7 +41,7 @@ type alias Error =
     String
 
 
-{-| IR values are variants of this type. All Elm values (as long as they don't
+{-| `IR` values are variants of this type. All Elm values (as long as they don't
 contain functions) should be able to be encoded as a value of this type.
 -}
 type IR
@@ -54,7 +56,7 @@ type IR
     | Labelled (Set.Set String) IR
 
 
-{-| A type used by the `Custom` constructor of the IR type.
+{-| A type used by the `Custom` constructor of the `IR` type.
 -}
 type Variant
     = Variant0
@@ -65,7 +67,7 @@ type Variant
     | Variant5 IR IR IR IR IR
 
 
-{-| Any IR value will have a "type" that is a variant of IRType.
+{-| Any IR value will have a "type" that is a variant of `IRType`.
 -}
 type IRType
     = BoolType
@@ -79,7 +81,7 @@ type IRType
     | LabelledType (Set.Set String) IRType
 
 
-{-| A type used by the `Custom` constructor of the IRType type.
+{-| A type used by the `Custom` constructor of the `IRType` type.
 -}
 type VariantType
     = Variant0Type
@@ -90,21 +92,21 @@ type VariantType
     | Variant5Type IRType IRType IRType IRType IRType
 
 
-{-| Use an appropriate Gadget to convert an Elm value into an IR value.
+{-| Use an appropriate Gadget to convert an Elm value into an `IR` value.
 -}
 fromInput : Gadget a -> a -> IR
 fromInput (Gadget c) input =
     c.fromInput input
 
 
-{-| Use an appropriate Gadget to extract the IRType of an Elm value.
+{-| Use an appropriate Gadget to extract the `IRType` of an Elm value.
 -}
 irType : Gadget a -> IRType
 irType (Gadget c) =
     c.irType
 
 
-{-| Use an appropriate Gadget to attempt to convert an IR value into an Elm
+{-| Use an appropriate Gadget to attempt to convert an `IR` value into an Elm
 value.
 -}
 toOutput : Gadget a -> IR -> Result Error a
