@@ -784,7 +784,7 @@ possibly failing the conversion to the more narrow result type.
                             Err "must contain at least one name"
 
                         h :: t ->
-                            Ok (h :: t)
+                            Ok ( h, t )
                 )
                 (\( h, t ) -> h :: t)
 
