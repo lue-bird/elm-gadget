@@ -35,7 +35,7 @@ tests =
                     "0"
                     (\() ->
                         let
-                            unused : Json.Decode.Value
+                            unused : Json.Encode.Value
                             unused =
                                 json__Readme_0
                         in
@@ -45,7 +45,8 @@ tests =
                     "1"
                     (\() ->
                         decoded__Readme_0
-                            |> Expect.equal (Result.Ok input__Readme_0)
+                            |> Expect.equal
+                                (Result.Ok { name = "Ed", age = 44 })
                     )
                 , Test.test
                     "2"
