@@ -1,19 +1,19 @@
 module Gadget.IR exposing
-    ( Gadget(..), Error
-    , fromInput, toOutput, irType
+    ( Gadget(..), toOutput, irType
     , IR(..), Variant(..), IRType(..), VariantType(..)
+    , Error, fromInput
     )
 
-{-| Tools for creating adapters for Gadgets
+{-| Tools for creating adapters for Gadgets.
 
+To see some examples of how to use this module, look at the source code for the
+various `Gadget.Adapter` modules in this package:
 
-# Working with Gadgets
+  - The simplest one is probably `Gadget.Adapter.Html`.
+  - For a bidirectional example, try `Gadget.Adapter.Json`.
+  - For an example of how to override Gadgets, see `Gadget.Adapter.Fuzz`.
 
-@docs Gadget, Error
-@docs fromInput, toOutput, irType
-
-
-# Working with IR
+@docs Gadget, Error @docs fromInput, toOutput, irType
 
 @docs IR, Variant, IRType, VariantType
 

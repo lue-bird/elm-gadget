@@ -66,7 +66,7 @@ override label codec inputGenerator =
 
 
 {-| Turn a Gadget into a `Random.Generator`, but override some of the default
-implementations of generators as defined by this module.
+implementations of generators that are defined by this module.
 
     import Gadget
     import Gadget.Adapter.Random

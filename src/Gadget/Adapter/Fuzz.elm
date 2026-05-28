@@ -3,48 +3,10 @@ module Gadget.Adapter.Fuzz exposing
     , fuzzerWithOverrides, Override, override
     )
 
-{-| Generate fuzzers for any Elm type.
-
-
-# Simple fuzzers
-
-    import Gadget
-    import Gadget.Adapter.Fuzz
-    import Fuzz
-
-    gadget =
-        Gadget.int
-
-    fuzzer =
-        Gadget.Adapter.Fuzz.fuzzer gadget
-
-    fuzzer --: Fuzz.Fuzzer Int
-
-    Fuzz.examples 1 fuzzer
-
-    --> [ 105 ]
+{-| Use a Gadget to create a `Fuzz.Fuzzer` for use with functions from the
+`elm-explorations/test` package.
 
 @docs fuzzer
-
-
-# Overriding fuzzers
-
-    import Gadget
-    import Gadget.Adapter.Fuzz
-    import Fuzz
-
-    gadget =
-        Gadget.int
-            |> Gadget.label "override-me"
-
-    fuzzer =
-        Gadget.Adapter.Fuzz.fuzzerWithOverrides
-            [ Gadget.Adapter.Fuzz.override "override-me" Gadget.int (Fuzz.constant 3) ]
-            gadget
-
-    Fuzz.examples 1 fuzzer
-
-    --> [ 3 ]
 
 @docs fuzzerWithOverrides, Override, override
 
@@ -56,14 +18,73 @@ import Gadget.IR as IR
 import Set
 
 
-{-| TODO
+{-| Turn a Gadget into a `Fuzz.Fuzzer`.
+
+    import Gadget
+    import Gadget.Adapter.Random
+    import Fuzz -- `elm-explorations/test`
+
+    type alias Person =
+        { name : String
+        , age : Int
+        }
+
+    personGadget =
+        Gadget.record Person
+            |> Gadget.field .name Gadget.string
+            |> Gadget.field .age Gadget.int
+            |> Gadget.endRecord
+
+    personFuzzer =
+        Gadget.Adapter.Fuzz.fuzzer personGadget
+
+    fuzzedPerson =
+        Fuzz.examples 1 personFuzzer
+
+    fuzzedPerson --> [ { age = 92, name = "o \n\\" } ]
+
 -}
 fuzzer : IR.Gadget a -> Fuzz.Fuzzer a
 fuzzer codec =
     fuzzerWithOverrides [] codec
 
 
-{-| TODO
+{-| Turn a Gadget into a `Fuzz.Fuzzer`, but override some of the default
+implementations of fuzzers that are defined by this module.
+
+    import Gadget
+    import Gadget.Adapter.Random
+    import Fuzz -- `elm-explorations/test`
+
+    type alias Person =
+        { name : String
+        , age : Int
+        }
+
+    personGadget =
+        Gadget.record Person
+            |> Gadget.field .name nameGadget
+            |> Gadget.field .age Gadget.int
+            |> Gadget.endRecord
+
+    nameGadget =
+        Gadget.string
+            |> Gadget.label "name"
+
+    personFuzzer =
+        Gadget.Adapter.Fuzz.fuzzerWithOverrides
+            [ Gadget.Adapter.Fuzz.override
+                "name"
+                Gadget.string
+                (Fuzz.constant "Ed")
+            ]
+            personGadget
+
+    fuzzedPerson =
+        Fuzz.examples 1 personFuzzer
+
+    fuzzedPerson --> [ { age = 105, name = "Ed" } ]
+
 -}
 fuzzerWithOverrides : List Override -> IR.Gadget a -> Fuzz.Fuzzer a
 fuzzerWithOverrides overrides codec =
@@ -86,13 +107,13 @@ fuzzerWithOverrides overrides codec =
             )
 
 
-{-| TODO
+{-| A type used to represent overrides.
 -}
 type Override
     = Override String (Fuzz.Fuzzer IR.IR)
 
 
-{-| TODO
+{-| Override the default implementation of a `Fuzz.Fuzzer`.
 -}
 override : String -> IR.Gadget a -> Fuzz.Fuzzer a -> Override
 override label codec inputFuzzer =

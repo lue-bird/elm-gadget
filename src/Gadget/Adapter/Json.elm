@@ -1,6 +1,7 @@
 module Gadget.Adapter.Json exposing (encode, decoder)
 
-{-|
+{-| Use a Gadget to convert Elm values into a JSON representation, and vice
+versa.
 
 @docs encode, decoder
 
@@ -12,7 +13,25 @@ import Json.Encode as JE
 import Set
 
 
-{-| TODO
+{-| Convert an Elm value into a `Json.Encode.Value`.
+
+    import Gadget
+    import Gadget.Adapter.Json
+    import Json.Encode
+
+    gadget =
+        Gadget.int
+
+    json =
+        Gadget.Adapter.Json.encode gadget 1
+
+    json --: Json.Encode.Value
+
+    jsonString =
+        Json.Encode.encode 0 json
+
+    jsonString --> "{\"int\":1}"
+
 -}
 encode : IR.Gadget a -> a -> JE.Value
 encode codec value =
@@ -21,7 +40,26 @@ encode codec value =
         |> encodeAdapter
 
 
-{-| TODO
+{-| Convert a Gadget into a `Json.Decode.Decoder`.
+
+    import Gadget
+    import Gadget.Adapter.Json
+    import Json.Decode
+
+    gadget =
+        Gadget.int
+
+    jsonString =
+        "{\"int\":1}"
+
+    decoder =
+        Gadget.Adapter.Json.decoder gadget
+
+    result =
+        Json.Decode.decodeString decoder jsonString
+
+    result --> Ok 1
+
 -}
 decoder : IR.Gadget a -> JD.Decoder a
 decoder codec =

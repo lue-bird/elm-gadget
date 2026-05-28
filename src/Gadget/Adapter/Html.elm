@@ -1,6 +1,6 @@
 module Gadget.Adapter.Html exposing (view)
 
-{-|
+{-| Use a Gadget to render an Elm value as HTML.
 
 @docs view
 
@@ -12,7 +12,20 @@ import Html.Attributes as HA
 import Set
 
 
-{-| TODO
+{-| Convert a value into an `Html msg`.
+
+    import Gadget
+    import Gadget.Adapter.Html
+    import Html
+
+    gadget =
+        Gadget.int
+
+    view =
+        Gadget.Adapter.Html.view gadget 1
+
+    view --: Html.Html msg
+
 -}
 view : IR.Gadget a -> a -> H.Html msg
 view codec value =
@@ -20,61 +33,6 @@ view codec value =
         |> htmlAdapter
         |> List.singleton
         |> H.article [ HA.class "elm-gadget" ]
-
-
-primitive : H.Html msg -> (String -> H.Html msg) -> String -> String -> H.Html msg
-primitive quoteHtml valueWrapper typeName value =
-    H.dl []
-        [ H.div [ HA.class "primitive", HA.class typeName ]
-            [ H.dt [] [ H.em [] [ H.text typeName ] ]
-            , H.dd [] [ H.span [] [ quoteHtml, valueWrapper value, quoteHtml ] ]
-            ]
-        ]
-
-
-labelled : String -> H.Html msg -> H.Html msg
-labelled label inner =
-    H.dl []
-        [ H.div [ HA.class "labelled" ]
-            [ H.dt []
-                [ H.em [] [ H.text "Label" ]
-                , H.code [] [ H.text label ]
-                ]
-            , H.dd [] [ inner ]
-            ]
-        ]
-
-
-quotedPrimitive : String -> String -> String -> H.Html msg
-quotedPrimitive quote =
-    primitive (H.span [ HA.class "quote" ] [ H.text quote ]) (\value -> H.code [] [ H.text value ])
-
-
-unquotedPrimitive : String -> String -> H.Html msg
-unquotedPrimitive =
-    primitive (H.text "") (\value -> H.code [] [ H.text value ])
-
-
-combinator : String -> String -> List IR.IR -> H.Html msg
-combinator typeName meta items =
-    if List.isEmpty items then
-        H.div [ HA.class "combinator", HA.class typeName ]
-            [ H.summary []
-                [ H.strong [] [ H.text typeName ]
-                , H.text (" " ++ meta)
-                ]
-            ]
-
-    else
-        H.details [ HA.class "combinator", HA.class typeName ]
-            [ H.summary []
-                [ H.strong [] [ H.text typeName ]
-                , H.text (" " ++ meta)
-                ]
-            , H.ol
-                []
-                (List.map (\item -> H.li [] [ htmlAdapter item ]) items)
-            ]
 
 
 htmlAdapter : IR.IR -> H.Html msg
@@ -196,3 +154,58 @@ htmlAdapter irValue =
                        )
                 )
                 items
+
+
+primitive : H.Html msg -> (String -> H.Html msg) -> String -> String -> H.Html msg
+primitive quoteHtml valueWrapper typeName value =
+    H.dl []
+        [ H.div [ HA.class "primitive", HA.class typeName ]
+            [ H.dt [] [ H.em [] [ H.text typeName ] ]
+            , H.dd [] [ H.span [] [ quoteHtml, valueWrapper value, quoteHtml ] ]
+            ]
+        ]
+
+
+labelled : String -> H.Html msg -> H.Html msg
+labelled label inner =
+    H.dl []
+        [ H.div [ HA.class "labelled" ]
+            [ H.dt []
+                [ H.em [] [ H.text "Label" ]
+                , H.code [] [ H.text label ]
+                ]
+            , H.dd [] [ inner ]
+            ]
+        ]
+
+
+quotedPrimitive : String -> String -> String -> H.Html msg
+quotedPrimitive quote =
+    primitive (H.span [ HA.class "quote" ] [ H.text quote ]) (\value -> H.code [] [ H.text value ])
+
+
+unquotedPrimitive : String -> String -> H.Html msg
+unquotedPrimitive =
+    primitive (H.text "") (\value -> H.code [] [ H.text value ])
+
+
+combinator : String -> String -> List IR.IR -> H.Html msg
+combinator typeName meta items =
+    if List.isEmpty items then
+        H.div [ HA.class "combinator", HA.class typeName ]
+            [ H.summary []
+                [ H.strong [] [ H.text typeName ]
+                , H.text (" " ++ meta)
+                ]
+            ]
+
+    else
+        H.details [ HA.class "combinator", HA.class typeName ]
+            [ H.summary []
+                [ H.strong [] [ H.text typeName ]
+                , H.text (" " ++ meta)
+                ]
+            , H.ol
+                []
+                (List.map (\item -> H.li [] [ htmlAdapter item ]) items)
+            ]

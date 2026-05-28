@@ -10,10 +10,13 @@ import Fuzz
 import Gadget
 import Gadget.Adapter.Diff
 import Gadget.Adapter.Fuzz
+import Gadget.Adapter.Html
 import Gadget.Adapter.Json
 import Gadget.Adapter.Random
 import Gadget.Adapter.String
+import Html
 import Json.Decode
+import Json.Encode
 import Parser
 import Random
 import Set
@@ -275,37 +278,83 @@ tests =
         , Test.describe
             "Gadget.Adapter.Fuzz"
             [ Test.describe
-                "module header"
+                "fuzzer"
+                [ Test.describe
+                    "code snippet 0"
+                    [ Test.test
+                        "0"
+                        (\() ->
+                            fuzzedPerson__Gadget_Adapter_Fuzz__fuzzer_0
+                                |> Expect.equal
+                                    [ { age = 92, name = "o \n\\" } ]
+                        )
+                    ]
+                ]
+            , Test.describe
+                "fuzzerWithOverrides"
+                [ Test.describe
+                    "code snippet 0"
+                    [ Test.test
+                        "0"
+                        (\() ->
+                            fuzzedPerson__Gadget_Adapter_Fuzz__fuzzerWithOverrides_0
+                                |> Expect.equal [ { age = 105, name = "Ed" } ]
+                        )
+                    ]
+                ]
+            ]
+        , Test.describe
+            "Gadget.Adapter.Html"
+            [ Test.describe
+                "view"
                 [ Test.describe
                     "code snippet 0"
                     [ Test.test
                         "0"
                         (\() ->
                             let
-                                unused : Fuzz.Fuzzer Basics.Int
+                                unused : Html.Html msg
                                 unused =
-                                    fuzzer__Gadget_Adapter_Fuzz__Header_0
+                                    view__Gadget_Adapter_Html__view_0
+                            in
+                            Expect.pass
+                        )
+                    ]
+                ]
+            ]
+        , Test.describe
+            "Gadget.Adapter.Json"
+            [ Test.describe
+                "decoder"
+                [ Test.describe
+                    "code snippet 0"
+                    [ Test.test
+                        "0"
+                        (\() ->
+                            result__Gadget_Adapter_Json__decoder_0
+                                |> Expect.equal (Result.Ok 1)
+                        )
+                    ]
+                ]
+            , Test.describe
+                "encode"
+                [ Test.describe
+                    "code snippet 0"
+                    [ Test.test
+                        "0"
+                        (\() ->
+                            let
+                                unused : Json.Encode.Value
+                                unused =
+                                    json__Gadget_Adapter_Json__encode_0
                             in
                             Expect.pass
                         )
                     , Test.test
                         "1"
                         (\() ->
-                            Fuzz.examples
-                                1
-                                fuzzer__Gadget_Adapter_Fuzz__Header_0
-                                |> Expect.equal [ 105 ]
-                        )
-                    ]
-                , Test.describe
-                    "code snippet 1"
-                    [ Test.test
-                        "0"
-                        (\() ->
-                            Fuzz.examples
-                                1
-                                fuzzer__Gadget_Adapter_Fuzz__Header_1
-                                |> Expect.equal [ 3 ]
+                            jsonString__Gadget_Adapter_Json__encode_0
+                                |> Expect.equal "{\"int\":1}"
                         )
                     ]
                 ]
@@ -487,26 +536,89 @@ changes__Gadget_Adapter_Diff__Header_0 =
         newValue__Gadget_Adapter_Diff__Header_0
 
 
-gadget__Gadget_Adapter_Fuzz__Header_0 =
+type alias Person__Gadget_Adapter_Fuzz__fuzzer_0 =
+    { name : String.String, age : Basics.Int }
+
+
+personGadget__Gadget_Adapter_Fuzz__fuzzer_0 =
+    Gadget.record Person__Gadget_Adapter_Fuzz__fuzzer_0
+        |> Gadget.field .name Gadget.string
+        |> Gadget.field .age Gadget.int
+        |> Gadget.endRecord
+
+
+personFuzzer__Gadget_Adapter_Fuzz__fuzzer_0 =
+    Gadget.Adapter.Fuzz.fuzzer personGadget__Gadget_Adapter_Fuzz__fuzzer_0
+
+
+fuzzedPerson__Gadget_Adapter_Fuzz__fuzzer_0 =
+    Fuzz.examples 1 personFuzzer__Gadget_Adapter_Fuzz__fuzzer_0
+
+
+type alias Person__Gadget_Adapter_Fuzz__fuzzerWithOverrides_0 =
+    { name : String.String, age : Basics.Int }
+
+
+personGadget__Gadget_Adapter_Fuzz__fuzzerWithOverrides_0 =
+    Gadget.record Person__Gadget_Adapter_Fuzz__fuzzerWithOverrides_0
+        |> Gadget.field
+            .name
+            nameGadget__Gadget_Adapter_Fuzz__fuzzerWithOverrides_0
+        |> Gadget.field .age Gadget.int
+        |> Gadget.endRecord
+
+
+nameGadget__Gadget_Adapter_Fuzz__fuzzerWithOverrides_0 =
+    Gadget.string |> Gadget.label "name"
+
+
+personFuzzer__Gadget_Adapter_Fuzz__fuzzerWithOverrides_0 =
+    Gadget.Adapter.Fuzz.fuzzerWithOverrides
+        [ Gadget.Adapter.Fuzz.override "name" Gadget.string (Fuzz.constant "Ed")
+        ]
+        personGadget__Gadget_Adapter_Fuzz__fuzzerWithOverrides_0
+
+
+fuzzedPerson__Gadget_Adapter_Fuzz__fuzzerWithOverrides_0 =
+    Fuzz.examples 1 personFuzzer__Gadget_Adapter_Fuzz__fuzzerWithOverrides_0
+
+
+gadget__Gadget_Adapter_Html__view_0 =
     Gadget.int
 
 
-fuzzer__Gadget_Adapter_Fuzz__Header_0 =
-    Gadget.Adapter.Fuzz.fuzzer gadget__Gadget_Adapter_Fuzz__Header_0
+view__Gadget_Adapter_Html__view_0 =
+    Gadget.Adapter.Html.view gadget__Gadget_Adapter_Html__view_0 1
 
 
-gadget__Gadget_Adapter_Fuzz__Header_1 =
-    Gadget.int |> Gadget.label "override-me"
+gadget__Gadget_Adapter_Json__decoder_0 =
+    Gadget.int
 
 
-fuzzer__Gadget_Adapter_Fuzz__Header_1 =
-    Gadget.Adapter.Fuzz.fuzzerWithOverrides
-        [ Gadget.Adapter.Fuzz.override
-            "override-me"
-            Gadget.int
-            (Fuzz.constant 3)
-        ]
-        gadget__Gadget_Adapter_Fuzz__Header_1
+jsonString__Gadget_Adapter_Json__decoder_0 =
+    "{\"int\":1}"
+
+
+decoder__Gadget_Adapter_Json__decoder_0 =
+    Gadget.Adapter.Json.decoder gadget__Gadget_Adapter_Json__decoder_0
+
+
+result__Gadget_Adapter_Json__decoder_0 =
+    Json.Decode.decodeString
+        decoder__Gadget_Adapter_Json__decoder_0
+        jsonString__Gadget_Adapter_Json__decoder_0
+
+
+gadget__Gadget_Adapter_Json__encode_0 =
+    Gadget.int
+
+
+json__Gadget_Adapter_Json__encode_0 =
+    Gadget.Adapter.Json.encode gadget__Gadget_Adapter_Json__encode_0 1
+
+
+jsonString__Gadget_Adapter_Json__encode_0 =
+    Json.Encode.encode 0 json__Gadget_Adapter_Json__encode_0
 
 
 type alias Person__Gadget_Adapter_Random__generator_0 =

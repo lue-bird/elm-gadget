@@ -1,7 +1,15 @@
 module Gadget.Adapter.Diff exposing (Changes, diff, patch)
 
-{-| Generate and use (fairly) efficient diffs between two values of any Elm
-type.
+{-| **Warning:** the functions in this module may not do what you expect!
+
+The aim of this module is not to create pretty, human-readable diffs for Elm
+values. It's designed to make (fairly) minimal diffs that can be sent over the
+wire between two Elm applications to keep data in sync (for example, in a
+Lamdera application).
+
+If anyone would like to contribute an example of using Gadgets to create nice
+human-readable diffs, I would be happy to add it to this package. I think it is
+probably possible with judicious (ab)use of Gadget.label.
 
     import Gadget
     import Gadget.Adapter.Diff

@@ -5,7 +5,8 @@ module Gadget exposing
     , tuple, triple
     , maybe, result
     , RecordGadgetBuilder, record, field, endRecord
-    , CustomGadgetBuilder, custom, variant0, variant1, variant2, variant3, variant4, variant5, endCustom
+    , CustomGadgetBuilder, custom, variant0, variant1, variant2, variant3
+    , variant4, variant5, endCustom
     , map
     , label
     )
@@ -13,7 +14,18 @@ module Gadget exposing
 {-| This module is for application developers who want to create Gadgets and use
 them with pre-existing adapters.
 
-If you want to make your own adapters, see the [Gadget.IR](Gadget-IR) module.
+The main idea is that you define a Gadget for each of the Elm types you declare
+in your application, and then you can use various adapters to get different
+functionality.
+
+There's a good example in the documentation for
+[`Gadget.Adapter.Fuzz.fuzzer`](Gadget-Adapter-Fuzz#fuzzer) and
+[`Gadget.Adapter.Random.generator`](Gadget-Adapter-Random#generator). You'll see
+the definition of `personGadget` is identical in both examples, and it can be
+used to create both a fuzzer and a random generator simply by passing it to the
+appropriate adapter functions.
+
+If you want to make your own adapters, see the [`Gadget.IR`](Gadget-IR) module.
 
 
 # Gadgets
@@ -78,7 +90,8 @@ If you want to make your own adapters, see the [Gadget.IR](Gadget-IR) module.
 
     shapeGadget --: Gadget.Gadget Shape
 
-@docs CustomGadgetBuilder, custom, variant0, variant1, variant2, variant3, variant4, variant5, endCustom
+@docs CustomGadgetBuilder, custom, variant0, variant1, variant2, variant3
+@docs variant4, variant5, endCustom
 
 
 # Transforming Gadgets
@@ -308,7 +321,7 @@ array item =
         |> map Array.fromList Array.toList
 
 
-{-| A combinator used to define Gadgets for the Maybe type.
+{-| A combinator used to define Gadgets for the `Maybe` type.
 
     import Gadget
 
@@ -334,7 +347,7 @@ maybe item =
         |> endCustom
 
 
-{-| A combinator used to define Gadgets for the Result type.
+{-| A combinator used to define Gadgets for the `Result` type.
 
     import Gadget
 
@@ -758,6 +771,9 @@ map aToB bToA (Gadget prev) =
 
 
 {-| Add a label to a Gadget.
+
+For an example of why this might be helpful, see the docs for
+[`Gadget.Adapter.Fuzz.fuzzerWithOverrides`](Gadget-Adapter-Fuzz#fuzzerWithOverrides).
 
     import Gadget
 
