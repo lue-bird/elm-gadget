@@ -416,7 +416,7 @@ tests =
         ]
 
 
-type alias User__Readme_0 =
+type alias Person__Readme_0 =
     { name : String.String, age : Basics.Int }
 
 
@@ -424,9 +424,9 @@ input__Readme_0 =
     { name = "Ed", age = 44 }
 
 
-gadget__Readme_0 : Gadget.Gadget User__Readme_0
+gadget__Readme_0 : Gadget.Gadget Person__Readme_0
 gadget__Readme_0 =
-    Gadget.record User__Readme_0
+    Gadget.record Person__Readme_0
         |> Gadget.field .name Gadget.string
         |> Gadget.field .age Gadget.int
         |> Gadget.endRecord

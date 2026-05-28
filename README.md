@@ -27,7 +27,7 @@ import Json.Decode
 
 -- For a data type like this:
 
-type alias User = 
+type alias Person = 
     { name : String
     , age : Int 
     }
@@ -39,16 +39,16 @@ input =
 
 -- Just write a Gadget like this:
 
-gadget : Gadget.Gadget User
+gadget : Gadget.Gadget Person
 gadget = 
-    Gadget.record User 
+    Gadget.record Person
         |> Gadget.field .name Gadget.string 
         |> Gadget.field .age Gadget.int
         |> Gadget.endRecord
 
 -- Now we just need to write a JSON encoder and 
 -- decoder for Gadgets, and we'll be able to 
--- use it to convert our User type to and 
+-- use it to convert our Person type to and 
 -- from JSON. Here's a JSON adapter I made earlier:
 
 json = 
